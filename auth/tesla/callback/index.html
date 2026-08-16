@@ -1,0 +1,22 @@
+<!doctype html>
+<!-- Compatibility trampoline used until api.ludicpulse.com is on port 443. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="dark">
+  <title>Signing in… · Ludic Pulse</title>
+  <style>
+    body { align-items: center; background: #0a0a0c; color: #aaa79f; display: flex;
+      font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      height: 100vh; justify-content: center; margin: 0; }
+  </style>
+</head>
+<body>
+  <p>Finishing sign-in…</p>
+  <script>
+    location.replace("https://telem.statmask.com:8443/auth/tesla/callback" + location.search);
+  </script>
+  <noscript><p>Enable JavaScript to finish signing in.</p></noscript>
+</body>
+</html>
