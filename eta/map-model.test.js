@@ -2,7 +2,9 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { presentation, validPoint, validPoints } = require('./map-model.js');
+const {
+  presentation, selectAppleRoute, shouldRefreshEstimate, validPoint, validPoints,
+} = require('./map-model.js');
 
 const position = { latitude: 40.7608, longitude: -111.8910 };
 const destination = { latitude: 40.7681, longitude: -111.8941 };
@@ -32,4 +34,40 @@ test('rejects malformed, non-finite, and out-of-bounds coordinates', () => {
   assert.equal(validPoint(null), false);
   assert.equal(validPoint({ latitude: Number.NaN, longitude: 0 }), false);
   assert.equal(validPoint({ latitude: 0, longitude: 181 }), false);
+});
+
+test('selects the Apple route closest to Tesla remaining distance', () => {
+  const routes = [
+    { distance: 16_000, polyline: { id: 'short' } },
+    { distance: 19_300, polyline: { id: 'match' } },
+    { distance: 24_000, polyline: { id: 'long' } },
+  ];
+  assert.equal(selectAppleRoute(routes, 12).polyline.id, 'match');
+  assert.equal(selectAppleRoute(routes, undefined).polyline.id, 'short');
+});
+
+test('rejects unusable Apple directions results', () => {
+  assert.equal(selectAppleRoute(null, 12), null);
+  assert.equal(selectAppleRoute([{ distance: Number.NaN, polyline: {} }], 12), null);
+  assert.equal(selectAppleRoute([{ distance: 19_000 }], 12), null);
+});
+
+test('refreshes an estimated route only for meaningful route changes', () => {
+  const previous = { position, destination, at: 1_000 };
+  const steady = { position: { latitude: 40.761, longitude: -111.891 }, destination };
+  assert.equal(shouldRefreshEstimate(null, steady, 2_000), true);
+  assert.equal(shouldRefreshEstimate(previous, steady, 50_000), false);
+  assert.equal(shouldRefreshEstimate(previous, steady, 61_001), true);
+  assert.equal(shouldRefreshEstimate(previous, {
+    position: { latitude: 40.765, longitude: -111.891 }, destination,
+  }, 2_000), true);
+  assert.equal(shouldRefreshEstimate(previous, {
+    position, destination: { latitude: 40.78, longitude: -111.89 },
+  }, 2_000), true);
+});
+
+test('never estimates when Tesla geometry exists or endpoints are incomplete', () => {
+  assert.equal(shouldRefreshEstimate(null, { position, destination, routePoints: [position, destination] }), false);
+  assert.equal(shouldRefreshEstimate(null, { position }), false);
+  assert.equal(shouldRefreshEstimate(null, { destination }), false);
 });

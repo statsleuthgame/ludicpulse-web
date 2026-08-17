@@ -13,9 +13,14 @@
   let mapKitInitialized = false;
   let currentMapToken = null;
   let mapItems = [];
+  let estimatedRoute = null;
+  let estimateBasis = null;
+  let estimateController = null;
 
   const validToken = /^[A-Za-z0-9_-]{40,80}$/.test(token);
-  const { validPoint, validPoints, presentation } = window.EtaMapModel;
+  const {
+    validPoint, validPoints, presentation, selectAppleRoute, shouldRefreshEstimate,
+  } = window.EtaMapModel;
   const finite = (value) => typeof value === 'number' && Number.isFinite(value);
   const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
   const clock = (date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -76,6 +81,12 @@
     el('map').hidden = true;
     el('route-fallback').hidden = !hasRoute;
     el('map-unavailable').hidden = hasRoute;
+    el('route-source').hidden = true;
+  }
+
+  function routeLabel(value) {
+    el('route-source').hidden = !value;
+    el('route-source').textContent = value || '';
   }
 
   function drawMap(data) {
@@ -116,13 +127,51 @@
       const coordinate = (point) => new window.mapkit.Coordinate(point.latitude, point.longitude);
       const car = new window.mapkit.MarkerAnnotation(coordinate(data.position), { color: '#378ADD', glyphText: '●', title: 'Current location' });
       mapItems = [car];
-      if (model.hasRoute) mapItems.unshift(new window.mapkit.PolylineOverlay(data.routePoints.map(coordinate), {
-        style: new window.mapkit.Style({ strokeColor: '#378ADD', lineWidth: 5, lineJoin: 'round', lineCap: 'round' }),
-      }));
+      if (model.hasRoute) {
+        estimateController?.abort(); estimateController = null; estimatedRoute = null; estimateBasis = null;
+        mapItems.unshift(new window.mapkit.PolylineOverlay(data.routePoints.map(coordinate), {
+          style: new window.mapkit.Style({ strokeColor: '#378ADD', lineWidth: 5, lineJoin: 'round', lineCap: 'round' }),
+        }));
+        routeLabel('Tesla route');
+      } else if (estimatedRoute?.polyline) {
+        estimatedRoute.polyline.style = new window.mapkit.Style({
+          strokeColor: '#378ADD', lineWidth: 5, lineJoin: 'round', lineCap: 'round',
+        });
+        mapItems.unshift(estimatedRoute.polyline);
+        routeLabel('Estimated route');
+      } else {
+        routeLabel(null);
+      }
       if (validPoint(data.destination)) mapItems.push(new window.mapkit.MarkerAnnotation(coordinate(data.destination), { color: '#21AD81', glyphText: '✓', title: 'Destination' }));
       map.addItems(mapItems); map.showItems(mapItems, { padding: new window.mapkit.Padding(48, 48, 48, 48) });
       el('map').hidden = false; el('route-fallback').hidden = true; el('map-unavailable').hidden = true;
+      requestEstimatedRoute(data);
     } catch (_) { showMapFallback(data); }
+  }
+
+  async function requestEstimatedRoute(data) {
+    if (!window.mapkit || !shouldRefreshEstimate(estimateBasis, data)) return;
+    estimateController?.abort();
+    const requestController = new AbortController();
+    estimateController = requestController;
+    estimateBasis = { position: data.position, destination: data.destination, at: Date.now() };
+    try {
+      const directions = new window.mapkit.Directions();
+      const response = await directions.route({
+        origin: data.position,
+        destination: data.destination,
+        requestsAlternateRoutes: true,
+        departureDate: new Date(),
+        signal: requestController.signal,
+      });
+      if (requestController.signal.aborted || !latest || validPoints(latest.routePoints)) return;
+      estimatedRoute = selectAppleRoute(response?.routes, data.remainingMiles);
+      if (estimatedRoute) renderMapKit(latest);
+    } catch (error) {
+      if (error?.name !== 'AbortError') estimatedRoute = null;
+    } finally {
+      if (estimateController === requestController) estimateController = null;
+    }
   }
 
   function render(data) {
@@ -183,6 +232,7 @@
   function stopPolling() {
     if (pollTimer) clearInterval(pollTimer); if (tickTimer) clearInterval(tickTimer);
     pollTimer = null; tickTimer = null; controller?.abort(); controller = null;
+    estimateController?.abort(); estimateController = null;
   }
   document.addEventListener('visibilitychange', () => document.hidden ? stopPolling() : startPolling());
   if (!validToken) terminal('ended'); else startPolling();
