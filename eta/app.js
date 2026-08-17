@@ -10,6 +10,9 @@
   let controller = null;
   let map = null;
   let mapScriptLoading = false;
+  let mapKitInitialized = false;
+  let currentMapToken = null;
+  let mapItems = [];
 
   const validToken = /^[A-Za-z0-9_-]{40,80}$/.test(token);
   const finite = (value) => typeof value === 'number' && Number.isFinite(value);
@@ -74,33 +77,42 @@
   function drawMap(data) {
     svgRoute(data.routePoints, data.progress, data.position);
     if (!data.mapToken || !validPoints(data.routePoints) || !validPoint(data.position)) return;
+    currentMapToken = data.mapToken;
     if (window.mapkit) { renderMapKit(data); return; }
     if (mapScriptLoading) return;
     mapScriptLoading = true;
     const script = document.createElement('script');
     script.src = 'https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.js';
-    script.onload = () => renderMapKit(data);
+    script.onload = () => renderMapKit(latest);
     script.onerror = () => { mapScriptLoading = false; };
     document.head.append(script);
   }
 
   function renderMapKit(data) {
     try {
-      if (!window.mapkit || !data.mapToken) return;
-      window.mapkit.init({ authorizationCallback: (done) => done(data.mapToken), language: 'en' });
-      if (map) map.destroy();
-      map = new window.mapkit.Map('map', {
+      if (!window.mapkit || !currentMapToken || !validPoints(data?.routePoints)) return;
+      if (!mapKitInitialized) {
+        window.mapkit.addEventListener('error', () => {
+          el('map').hidden = true; el('route-fallback').hidden = false;
+        });
+        window.mapkit.init({
+          authorizationCallback: (done) => done(currentMapToken), language: 'en',
+        });
+        mapKitInitialized = true;
+      }
+      map ??= new window.mapkit.Map('map', {
         colorScheme: window.mapkit.Map.ColorSchemes.Dark,
         showsCompass: window.mapkit.FeatureVisibility.Hidden,
         showsMapTypeControl: false,
       });
+      if (mapItems.length) map.removeItems(mapItems);
       const route = new window.mapkit.PolylineOverlay(data.routePoints, {
         style: new window.mapkit.Style({ strokeColor: '#378ADD', lineWidth: 5, lineJoin: 'round', lineCap: 'round' }),
       });
       const car = new window.mapkit.MarkerAnnotation(data.position, { color: '#378ADD', glyphText: '●', title: 'Current location' });
-      const items = [route, car];
-      if (validPoint(data.destination)) items.push(new window.mapkit.MarkerAnnotation(data.destination, { color: '#21AD81', glyphText: '✓', title: 'Destination' }));
-      map.addItems(items); map.showItems(items, { padding: new window.mapkit.Padding(48, 48, 48, 48) });
+      mapItems = [route, car];
+      if (validPoint(data.destination)) mapItems.push(new window.mapkit.MarkerAnnotation(data.destination, { color: '#21AD81', glyphText: '✓', title: 'Destination' }));
+      map.addItems(mapItems); map.showItems(mapItems, { padding: new window.mapkit.Padding(48, 48, 48, 48) });
       el('map').hidden = false; el('route-fallback').hidden = true;
     } catch (_) { el('map').hidden = true; el('route-fallback').hidden = false; }
   }
