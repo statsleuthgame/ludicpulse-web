@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Follow a privately shared Ludic Pulse trip ETA.">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.apple-mapkit.com; style-src 'self'; img-src 'self' data: blob: https://*.apple-mapkit.com https://*.mzstatic.com; connect-src https://telem.statmask.com:8443 https://*.apple-mapkit.com https://*.ls.apple.com; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="/eta/styles.css">
+  <title>Shared ETA · Ludic Pulse</title>
+</head>
+<body>
+  <noscript><p>JavaScript is required to open this private live ETA.</p></noscript>
+  <main class="shell">
+    <header class="brand"><img src="/icon.png" alt="" width="32" height="32"><span>Ludic Pulse</span></header>
+    <section id="loading" class="status" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <h1>Opening private ETA…</h1>
+      <p>Waiting for the latest trip update.</p>
+    </section>
+    <section id="trip" hidden>
+      <p id="state-chip" class="chip">Live</p>
+      <h1 id="heading">On the way</h1>
+      <p id="destination" class="destination" hidden></p>
+      <div class="hero-card">
+        <div><strong id="arrival">—</strong><span>ARRIVAL</span></div>
+        <div><strong id="countdown">—</strong><span>REMAINING</span></div>
+      </div>
+      <div id="map-wrap" class="map-wrap" aria-label="Live route map">
+        <div id="map" class="map" hidden></div>
+        <svg id="route-fallback" class="route" viewBox="0 0 700 420" role="img" aria-labelledby="route-title route-desc">
+          <title id="route-title">Tesla route progress</title>
+          <desc id="route-desc">A simplified view of the route supplied by Tesla.</desc>
+          <path id="route-background" class="route-background" d="M70 340 C170 280 185 170 310 205 S485 125 630 70"></path>
+          <path id="route-line" class="route-line" d="M70 340 C170 280 185 170 310 205 S485 125 630 70"></path>
+          <circle id="car-marker" class="car-marker" cx="70" cy="340" r="11"></circle>
+          <circle id="destination-marker" class="destination-marker" cx="630" cy="70" r="10"></circle>
+        </svg>
+        <div class="progress-labels"><span id="miles">— mi left</span><span id="battery">Arrival battery —</span></div>
+        <div id="progress" class="progress" role="progressbar" aria-label="Trip progress" aria-valuemin="0" aria-valuemax="100"><span></span></div>
+      </div>
+      <div class="details">
+        <div><span>Traffic delay</span><strong id="traffic">Not reported</strong></div>
+        <div><span>Freshness</span><strong id="freshness">Updated just now</strong></div>
+      </div>
+      <p class="privacy">This link shows one current trip only. Ludic Pulse does not show speed, trip history, a VIN, an email address, or earlier locations.</p>
+    </section>
+    <section id="terminal" class="status" hidden aria-live="polite">
+      <div class="terminal-icon" aria-hidden="true">✓</div>
+      <h1 id="terminal-title">Sharing ended</h1>
+      <p id="terminal-body">This private trip is no longer available.</p>
+    </section>
+    <footer>Ludic Pulse is independent and is not affiliated with, endorsed by, or sponsored by Tesla, Inc. Route and ETA data comes from the sharing driver’s Tesla.</footer>
+  </main>
+  <script src="/eta/app.js" defer></script>
+</body>
+</html>
