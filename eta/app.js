@@ -15,11 +15,8 @@
   let mapItems = [];
 
   const validToken = /^[A-Za-z0-9_-]{40,80}$/.test(token);
+  const { validPoint, validPoints, presentation } = window.EtaMapModel;
   const finite = (value) => typeof value === 'number' && Number.isFinite(value);
-  const validPoint = (value) => value && finite(value.latitude) && finite(value.longitude)
-    && Math.abs(value.latitude) <= 90 && Math.abs(value.longitude) <= 180;
-  const validPoints = (value) => Array.isArray(value) && value.length >= 2
-    && value.length <= 10_000 && value.every(validPoint);
   const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
   const clock = (date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const miles = (value) => `${value < 10 ? value.toFixed(1) : Math.round(value)} mi left`;
@@ -40,7 +37,7 @@
 
   function svgRoute(points, progress, position) {
     const svg = el('route-fallback');
-    if (!validPoints(points)) { svg.hidden = false; return; }
+    if (!validPoints(points)) { svg.hidden = true; return; }
     const latitudes = points.map((point) => point.latitude);
     const longitudes = points.map((point) => point.longitude);
     const minLat = Math.min(...latitudes), maxLat = Math.max(...latitudes);
@@ -74,9 +71,18 @@
     svg.hidden = false;
   }
 
+  function showMapFallback(data) {
+    const hasRoute = validPoints(data?.routePoints);
+    el('map').hidden = true;
+    el('route-fallback').hidden = !hasRoute;
+    el('map-unavailable').hidden = hasRoute;
+  }
+
   function drawMap(data) {
     svgRoute(data.routePoints, data.progress, data.position);
-    if (!data.mapToken || !validPoints(data.routePoints) || !validPoint(data.position)) return;
+    el('map-unavailable').hidden = true;
+    const model = presentation(data);
+    if (!model.canRenderMap) { showMapFallback(data); return; }
     currentMapToken = data.mapToken;
     if (window.mapkit) { renderMapKit(data); return; }
     if (mapScriptLoading) return;
@@ -90,10 +96,11 @@
 
   function renderMapKit(data) {
     try {
-      if (!window.mapkit || !currentMapToken || !validPoints(data?.routePoints)) return;
+      const model = presentation(data);
+      if (!window.mapkit || !currentMapToken || !model.hasPosition) return;
       if (!mapKitInitialized) {
         window.mapkit.addEventListener('error', () => {
-          el('map').hidden = true; el('route-fallback').hidden = false;
+          showMapFallback(latest);
         });
         window.mapkit.init({
           authorizationCallback: (done) => done(currentMapToken), language: 'en',
@@ -106,15 +113,16 @@
         showsMapTypeControl: false,
       });
       if (mapItems.length) map.removeItems(mapItems);
-      const route = new window.mapkit.PolylineOverlay(data.routePoints, {
+      const coordinate = (point) => new window.mapkit.Coordinate(point.latitude, point.longitude);
+      const car = new window.mapkit.MarkerAnnotation(coordinate(data.position), { color: '#378ADD', glyphText: '●', title: 'Current location' });
+      mapItems = [car];
+      if (model.hasRoute) mapItems.unshift(new window.mapkit.PolylineOverlay(data.routePoints.map(coordinate), {
         style: new window.mapkit.Style({ strokeColor: '#378ADD', lineWidth: 5, lineJoin: 'round', lineCap: 'round' }),
-      });
-      const car = new window.mapkit.MarkerAnnotation(data.position, { color: '#378ADD', glyphText: '●', title: 'Current location' });
-      mapItems = [route, car];
-      if (validPoint(data.destination)) mapItems.push(new window.mapkit.MarkerAnnotation(data.destination, { color: '#21AD81', glyphText: '✓', title: 'Destination' }));
+      }));
+      if (validPoint(data.destination)) mapItems.push(new window.mapkit.MarkerAnnotation(coordinate(data.destination), { color: '#21AD81', glyphText: '✓', title: 'Destination' }));
       map.addItems(mapItems); map.showItems(mapItems, { padding: new window.mapkit.Padding(48, 48, 48, 48) });
-      el('map').hidden = false; el('route-fallback').hidden = true;
-    } catch (_) { el('map').hidden = true; el('route-fallback').hidden = false; }
+      el('map').hidden = false; el('route-fallback').hidden = true; el('map-unavailable').hidden = true;
+    } catch (_) { showMapFallback(data); }
   }
 
   function render(data) {
