@@ -1,5 +1,7 @@
 const menuButton = document.querySelector('[data-menu-button]');
 const menu = document.querySelector('[data-menu]');
+const menuParent = menu?.parentNode;
+const menuNextSibling = menu?.nextSibling;
 const header = document.querySelector('[data-header]');
 const pageRegions = [document.querySelector('main'), document.querySelector('footer')].filter(Boolean);
 let menuReturnFocus = null;
@@ -20,21 +22,30 @@ function closeMenu({ restoreFocus = false, restoreScroll = true } = {}) {
   menuButton.setAttribute('aria-expanded', 'false');
   menuButton.querySelector('.sr-only').textContent = 'Open navigation';
   menu.classList.remove('is-open');
+  menuParent?.insertBefore(menu, menuNextSibling);
   document.body.classList.remove('menu-open');
+  document.body.style.top = '';
   setPageInert(false);
-  if (restoreFocus) menuReturnFocus?.focus();
+  if (restoreFocus) menuReturnFocus?.focus({ preventScroll: true });
   menuReturnFocus = null;
   menuScrollY = 0;
-  if (restoreScroll) requestAnimationFrame(() => window.scrollTo(0, scrollYToRestore));
+  if (restoreScroll) requestAnimationFrame(() => {
+    const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, scrollYToRestore);
+    document.documentElement.style.scrollBehavior = previousScrollBehavior;
+  });
 }
 
 function openMenu() {
   if (!menuButton || !menu) return;
   menuScrollY = window.scrollY;
   menuReturnFocus = document.activeElement;
+  document.body.append(menu);
   menuButton.setAttribute('aria-expanded', 'true');
   menuButton.querySelector('.sr-only').textContent = 'Close navigation';
   menu.classList.add('is-open');
+  document.body.style.top = `-${menuScrollY}px`;
   document.body.classList.add('menu-open');
   setPageInert(true);
   requestAnimationFrame(() => menu.querySelector('a')?.focus());
