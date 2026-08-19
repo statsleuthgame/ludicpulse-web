@@ -46,11 +46,9 @@ function openMenu() {
   document.body.style.top = `-${menuScrollY}px`;
   document.body.classList.add('menu-open');
   setPageInert(true);
-  queueMicrotask(() => {
+  requestAnimationFrame(() => {
     menuParent?.append(menu);
-    queueMicrotask(() => menuParent?.append(menu));
   });
-  requestAnimationFrame(() => menu.querySelector('a')?.focus());
 }
 
 if (menuButton && menu) {
@@ -76,7 +74,11 @@ if (menuButton && menu) {
     const focusable = [menuButton, ...menu.querySelectorAll('a')];
     const first = focusable[0];
     const last = focusable.at(-1);
-    if (event.shiftKey && document.activeElement === first) {
+    if (!focusable.includes(document.activeElement)) {
+      event.preventDefault();
+      first.focus();
+      requestAnimationFrame(() => menuParent?.append(menu));
+    } else if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
       last.focus();
     } else if (!event.shiftKey && document.activeElement === last) {

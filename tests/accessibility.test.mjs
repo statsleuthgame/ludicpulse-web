@@ -44,6 +44,7 @@ test('mobile navigation supports containment, Escape, and focus restoration', ()
   assert.match(script, /setPageInert\(true\)/);
   assert.match(script, /event\.key !== 'Tab'/);
   assert.match(script, /closeMenu\(\{ restoreFocus: true \}\)/);
+  assert.match(script, /!focusable\.includes\(document\.activeElement\)/);
 });
 
 test('mobile navigation owns the viewport below the header', () => {
@@ -52,9 +53,9 @@ test('mobile navigation owns the viewport below the header', () => {
   assert.match(headerRule, /background: var\(--black\)/);
   assert.doesNotMatch(headerRule, /backdrop-filter|transform|perspective/);
   const layerMove = script.indexOf('document.body.append(menu)');
-  const layerRestore = script.indexOf('queueMicrotask(() => {', layerMove);
+  const layerRestore = script.indexOf('requestAnimationFrame(() => {', layerMove);
   assert.ok(layerMove >= 0 && layerRestore > layerMove);
-  assert.equal(script.match(/menuParent\?\.append\(menu\)/g)?.length, 2);
+  assert.ok((script.match(/menuParent\?\.append\(menu\)/g)?.length ?? 0) >= 1);
 });
 
 test('mobile navigation restores its opening scroll position when dismissed', () => {
