@@ -115,7 +115,7 @@ try {
         document.head.append(script);
       });
       await load('https://cdn.apple-mapkit.com/mk/5.81.65/mapkit.js');
-      await load('/eta/map-model.js?v=20260818-mapkit5');
+      await load('/eta/map-model.js?v=20260819-clean');
       mapkit.init({ authorizationCallback: (done) => done(${JSON.stringify(token)}), language: 'en' });
       const mapElement = document.createElement('div');
       mapElement.style.cssText = 'width:640px;height:420px';

@@ -7,6 +7,7 @@ const vm = require('node:vm');
 const model = require('./map-model.js');
 
 const source = readFileSync(new URL('./app.js', `file://${__filename}`), 'utf8');
+const pageSource = readFileSync(new URL('./index.html', `file://${__filename}`), 'utf8');
 const position = { latitude: 40.7608, longitude: -111.8910 };
 const destination = { latitude: 40.7681, longitude: -111.8941 };
 
@@ -15,6 +16,15 @@ const settle = () => new Promise((resolve) => setImmediate(() => setImmediate(re
 test('pins the MapKit runtime whose callback contract the page implements', () => {
   assert.match(source, /\/mk\/5\.81\.65\/mapkit\.js/);
   assert.doesNotMatch(source, /\/mk\/5\.x\.x\/mapkit\.js/);
+});
+
+test('keeps the recipient page focused and advertises the shipped Ludic Pulse icon', () => {
+  assert.doesNotMatch(pageSource, /class="details"|id="traffic"|id="freshness"|class="privacy"/);
+  assert.doesNotMatch(source, /el\('traffic'\)|el\('freshness'\)/);
+  assert.match(pageSource, /rel="icon"[^>]+favicon\.png\?v=20260819-pulse/);
+  assert.match(pageSource, /rel="apple-touch-icon"[^>]+icon\.png\?v=20260819-pulse/);
+  assert.match(pageSource, /property="og:image" content="https:\/\/ludicpulse\.com\/icon\.png\?v=20260819-pulse"/);
+  assert.match(pageSource, /class="brand"><img src="\/icon\.png\?v=20260819-pulse"/);
 });
 
 function element() {

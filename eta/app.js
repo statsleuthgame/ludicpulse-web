@@ -29,13 +29,6 @@
   const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
   const clock = (date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const miles = (value) => `${value < 10 ? value.toFixed(1) : Math.round(value)} mi left`;
-  const ago = (iso) => {
-    const seconds = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 1000));
-    if (seconds < 10) return 'Updated just now';
-    if (seconds < 60) return `Updated ${seconds} sec ago`;
-    return `Updated ${Math.round(seconds / 60)} min ago`;
-  };
-
   function terminal(state) {
     el('loading').hidden = true; el('trip').hidden = true; el('terminal').hidden = false;
     el('terminal-title').textContent = state === 'expired' ? 'Link expired' : 'Sharing ended';
@@ -208,7 +201,6 @@
     el('arrival').textContent = Number.isFinite(etaAt.getTime()) ? clock(etaAt) : '—';
     el('miles').textContent = finite(data.remainingMiles) ? miles(Math.max(0, data.remainingMiles)) : 'Distance unavailable';
     el('battery').textContent = finite(data.arrivalSoc) ? `Arrival battery ${Math.round(data.arrivalSoc)}%` : 'Arrival battery unavailable';
-    el('traffic').textContent = finite(data.trafficDelayMinutes) ? `${Math.max(0, Math.round(data.trafficDelayMinutes))} min` : 'Not reported';
     const progress = finite(data.progress) ? clamp(data.progress, 0, 100) : 0;
     el('progress').setAttribute('aria-valuenow', String(Math.round(progress)));
     el('progress').querySelector('span').style.width = `${progress}%`;
@@ -220,7 +212,6 @@
     const eta = Date.parse(latest.etaAt);
     const minutes = Number.isFinite(eta) ? Math.max(0, Math.ceil((eta - Date.now()) / 60_000)) : null;
     el('countdown').textContent = minutes == null ? '—' : `${minutes} min`;
-    el('freshness').textContent = latest.updatedAt ? ago(latest.updatedAt) : 'Waiting for update';
   }
 
   async function poll() {
