@@ -22,7 +22,6 @@ function closeMenu({ restoreFocus = false, restoreScroll = true } = {}) {
   menuButton.setAttribute('aria-expanded', 'false');
   menuButton.querySelector('.sr-only').textContent = 'Open navigation';
   menu.classList.remove('is-open');
-  menuParent?.insertBefore(menu, menuNextSibling);
   document.body.classList.remove('menu-open');
   document.body.style.top = '';
   setPageInert(false);
@@ -48,6 +47,7 @@ function openMenu() {
   document.body.style.top = `-${menuScrollY}px`;
   document.body.classList.add('menu-open');
   setPageInert(true);
+  menuParent?.insertBefore(menu, menuNextSibling);
   requestAnimationFrame(() => menu.querySelector('a')?.focus());
 }
 
