@@ -52,7 +52,7 @@ test('mobile navigation owns the viewport below the header', () => {
   assert.match(headerRule, /background: var\(--black\)/);
   assert.doesNotMatch(headerRule, /backdrop-filter|transform|perspective/);
   const layerMove = script.indexOf('document.body.append(menu)');
-  const layerRestore = script.indexOf('menuParent?.insertBefore(menu, menuNextSibling)', layerMove);
+  const layerRestore = script.indexOf('queueMicrotask(() => menuParent?.insertBefore(menu, menuNextSibling))', layerMove);
   assert.ok(layerMove >= 0 && layerRestore > layerMove);
 });
 
