@@ -46,7 +46,10 @@ function openMenu() {
   document.body.style.top = `-${menuScrollY}px`;
   document.body.classList.add('menu-open');
   setPageInert(true);
-  queueMicrotask(() => menuParent?.append(menu));
+  queueMicrotask(() => {
+    menuParent?.append(menu);
+    queueMicrotask(() => menuParent?.append(menu));
+  });
   requestAnimationFrame(() => menu.querySelector('a')?.focus());
 }
 
