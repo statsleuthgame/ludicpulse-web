@@ -49,6 +49,7 @@ test('mobile navigation supports containment, Escape, and focus restoration', ()
 test('mobile navigation owns the viewport below the header', () => {
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.site-nav \{[\s\S]*?position: fixed;[\s\S]*?top: 68px;[\s\S]*?height: calc\(100dvh - 68px\);[\s\S]*?overflow-y: auto;[\s\S]*?background: var\(--black\);/);
   assert.match(css, /body\.menu-open \.site-header \{[^}]*backdrop-filter: none;/);
+  assert.match(script, /header\?\.style\.setProperty\('backdrop-filter', 'none'\)/);
   assert.match(script, /document\.body\.append\(menu\)/);
   assert.match(script, /menuParent\?\.insertBefore\(menu, menuNextSibling\)/);
 });
