@@ -15,12 +15,16 @@
   let mapItems = [];
   let estimatedRoute = null;
   let estimateBasis = null;
-  let estimateController = null;
+  let estimateGeneration = 0;
+  let estimateFailures = 0;
+  let estimateRetryTimer = null;
 
   const validToken = /^[A-Za-z0-9_-]{40,80}$/.test(token);
   const {
-    validPoint, validPoints, presentation, selectAppleRoute, shouldRefreshEstimate,
+    validPoint, validPoints, presentation, requestAppleRoute, selectAppleRoute,
+    shouldRefreshEstimate,
   } = window.EtaMapModel;
+  const ESTIMATE_RETRY_MS = [5_000, 15_000, 60_000];
   const finite = (value) => typeof value === 'number' && Number.isFinite(value);
   const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
   const clock = (date) => date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
@@ -99,9 +103,9 @@
     if (mapScriptLoading) return;
     mapScriptLoading = true;
     const script = document.createElement('script');
-    script.src = 'https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.js';
+    script.src = 'https://cdn.apple-mapkit.com/mk/5.81.65/mapkit.js';
     script.onload = () => renderMapKit(latest);
-    script.onerror = () => { mapScriptLoading = false; };
+    script.onerror = () => { mapScriptLoading = false; showMapFallback(latest); };
     document.head.append(script);
   }
 
@@ -128,7 +132,7 @@
       const car = new window.mapkit.MarkerAnnotation(coordinate(data.position), { color: '#378ADD', glyphText: '●', title: 'Current location' });
       mapItems = [car];
       if (model.hasRoute) {
-        estimateController?.abort(); estimateController = null; estimatedRoute = null; estimateBasis = null;
+        cancelEstimateWork(); estimatedRoute = null; estimateBasis = null; estimateFailures = 0;
         mapItems.unshift(new window.mapkit.PolylineOverlay(data.routePoints.map(coordinate), {
           style: new window.mapkit.Style({ strokeColor: '#378ADD', lineWidth: 5, lineJoin: 'round', lineCap: 'round' }),
         }));
@@ -146,31 +150,49 @@
       map.addItems(mapItems); map.showItems(mapItems, { padding: new window.mapkit.Padding(48, 48, 48, 48) });
       el('map').hidden = false; el('route-fallback').hidden = true; el('map-unavailable').hidden = true;
       requestEstimatedRoute(data);
-    } catch (_) { showMapFallback(data); }
+    } catch (error) {
+      console.warn(`[Ludic Pulse] Map rendering failed (${typeof error?.name === 'string' ? error.name : 'Error'}).`);
+      showMapFallback(data);
+    }
   }
 
-  async function requestEstimatedRoute(data) {
-    if (!window.mapkit || !shouldRefreshEstimate(estimateBasis, data)) return;
-    estimateController?.abort();
-    const requestController = new AbortController();
-    estimateController = requestController;
+  function cancelEstimateWork() {
+    estimateGeneration += 1;
+    if (estimateRetryTimer) clearTimeout(estimateRetryTimer);
+    estimateRetryTimer = null;
+  }
+
+  function scheduleEstimateRetry() {
+    if (estimateRetryTimer || !latest || validPoints(latest.routePoints)) return;
+    const delay = ESTIMATE_RETRY_MS[Math.min(estimateFailures - 1, ESTIMATE_RETRY_MS.length - 1)];
+    estimateRetryTimer = setTimeout(() => {
+      estimateRetryTimer = null;
+      void requestEstimatedRoute(latest, true);
+    }, delay);
+  }
+
+  async function requestEstimatedRoute(data, force = false) {
+    if (!window.mapkit || (!force && !shouldRefreshEstimate(estimateBasis, data))) return;
+    if (estimateRetryTimer) clearTimeout(estimateRetryTimer);
+    estimateRetryTimer = null;
+    const requestGeneration = ++estimateGeneration;
     estimateBasis = { position: data.position, destination: data.destination, at: Date.now() };
+    if (!estimatedRoute) routeLabel('Calculating route…');
     try {
-      const directions = new window.mapkit.Directions();
-      const response = await directions.route({
-        origin: data.position,
-        destination: data.destination,
-        requestsAlternateRoutes: true,
-        departureDate: new Date(),
-        signal: requestController.signal,
-      });
-      if (requestController.signal.aborted || !latest || validPoints(latest.routePoints)) return;
-      estimatedRoute = selectAppleRoute(response?.routes, data.remainingMiles);
-      if (estimatedRoute) renderMapKit(latest);
+      const response = await requestAppleRoute(window.mapkit, data.position, data.destination);
+      if (requestGeneration !== estimateGeneration || !latest || validPoints(latest.routePoints)) return;
+      const route = selectAppleRoute(response?.routes, data.remainingMiles);
+      if (!route) throw new Error('MapKit returned no usable route');
+      estimatedRoute = route;
+      estimateFailures = 0;
+      renderMapKit(latest);
     } catch (error) {
-      if (error?.name !== 'AbortError') estimatedRoute = null;
-    } finally {
-      if (estimateController === requestController) estimateController = null;
+      if (requestGeneration !== estimateGeneration) return;
+      estimateFailures += 1;
+      if (!estimatedRoute) routeLabel('Route temporarily unavailable · retrying');
+      const reason = typeof error?.name === 'string' ? error.name : 'Error';
+      console.warn(`[Ludic Pulse] Estimated route request failed (${reason}).`);
+      scheduleEstimateRetry();
     }
   }
 
@@ -232,7 +254,7 @@
   function stopPolling() {
     if (pollTimer) clearInterval(pollTimer); if (tickTimer) clearInterval(tickTimer);
     pollTimer = null; tickTimer = null; controller?.abort(); controller = null;
-    estimateController?.abort(); estimateController = null;
+    cancelEstimateWork(); estimateBasis = null;
   }
   document.addEventListener('visibilitychange', () => document.hidden ? stopPolling() : startPolling());
   if (!validToken) terminal('ended'); else startPolling();

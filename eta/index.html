@@ -8,7 +8,7 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.apple-mapkit.com; worker-src blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.apple-mapkit.com https://*.mzstatic.com; connect-src https://telem.statmask.com:8443 https://*.apple-mapkit.com https://*.ls.apple.com; font-src 'self'; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="/favicon.png">
-  <link rel="stylesheet" href="/eta/styles.css">
+  <link rel="stylesheet" href="/eta/styles.css?v=20260818-mapkit5">
   <title>Shared ETA · Ludic Pulse</title>
 </head>
 <body>
@@ -30,7 +30,7 @@
       </div>
       <div id="map-wrap" class="map-wrap" aria-label="Live route map">
         <div id="map" class="map" hidden></div>
-        <span id="route-source" class="route-source" hidden></span>
+        <span id="route-source" class="route-source" role="status" aria-live="polite" hidden></span>
         <svg id="route-fallback" class="route" viewBox="0 0 700 420" role="img" aria-labelledby="route-title route-desc" hidden>
           <title id="route-title">Tesla route progress</title>
           <desc id="route-desc">A simplified view of the route supplied by Tesla.</desc>
@@ -59,7 +59,7 @@
     </section>
     <footer>Ludic Pulse is independent and is not affiliated with, endorsed by, or sponsored by Tesla, Inc. Route and ETA data comes from the sharing driver’s Tesla.</footer>
   </main>
-  <script src="/eta/map-model.js" defer></script>
-  <script src="/eta/app.js" defer></script>
+  <script src="/eta/map-model.js?v=20260818-mapkit5" defer></script>
+  <script src="/eta/app.js?v=20260818-mapkit5" defer></script>
 </body>
 </html>

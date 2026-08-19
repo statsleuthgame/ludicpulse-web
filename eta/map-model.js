@@ -55,5 +55,28 @@
     return !finite(previous.at) || now - previous.at >= ESTIMATE_REFRESH_MS;
   }
 
-  return { validPoint, validPoints, presentation, selectAppleRoute, shouldRefreshEstimate };
+  function requestAppleRoute(mapkit, origin, destination, departureDate = new Date()) {
+    if (!mapkit?.Coordinate || !mapkit?.Directions || !validPoint(origin) || !validPoint(destination)) {
+      return Promise.reject(new Error('MapKit directions are unavailable'));
+    }
+    return new Promise((resolve, reject) => {
+      const directions = new mapkit.Directions();
+      const request = {
+        origin: new mapkit.Coordinate(origin.latitude, origin.longitude),
+        destination: new mapkit.Coordinate(destination.latitude, destination.longitude),
+        transportType: mapkit.Directions.Transport.Automobile,
+        requestsAlternateRoutes: true,
+        departureDate,
+      };
+      directions.route(request, (error, response) => {
+        if (error) reject(error);
+        else if (response) resolve(response);
+        else reject(new Error('MapKit returned no directions response'));
+      });
+    });
+  }
+
+  return {
+    validPoint, validPoints, presentation, requestAppleRoute, selectAppleRoute, shouldRefreshEstimate,
+  };
 });

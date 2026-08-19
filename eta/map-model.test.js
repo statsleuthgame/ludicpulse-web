@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
-  presentation, selectAppleRoute, shouldRefreshEstimate, validPoint, validPoints,
+  presentation, requestAppleRoute, selectAppleRoute, shouldRefreshEstimate, validPoint, validPoints,
 } = require('./map-model.js');
 
 const position = { latitude: 40.7608, longitude: -111.8910 };
@@ -70,4 +70,42 @@ test('never estimates when Tesla geometry exists or endpoints are incomplete', (
   assert.equal(shouldRefreshEstimate(null, { position, destination, routePoints: [position, destination] }), false);
   assert.equal(shouldRefreshEstimate(null, { position }), false);
   assert.equal(shouldRefreshEstimate(null, { destination }), false);
+});
+
+test('uses the MapKit 5 callback contract with Coordinate instances and automobile routing', async () => {
+  let captured;
+  class Coordinate {
+    constructor(latitude, longitude) { Object.assign(this, { latitude, longitude }); }
+  }
+  class Directions {
+    static Transport = { Automobile: 'AUTOMOBILE' };
+    route(request, callback) {
+      captured = { request, callback };
+      callback(null, { routes: [{ distance: 1, polyline: {} }] });
+    }
+  }
+  const response = await requestAppleRoute({ Coordinate, Directions }, position, destination, new Date(0));
+  assert.ok(captured.request.origin instanceof Coordinate);
+  assert.ok(captured.request.destination instanceof Coordinate);
+  assert.equal(captured.request.transportType, 'AUTOMOBILE');
+  assert.equal(captured.request.requestsAlternateRoutes, true);
+  assert.equal(typeof captured.callback, 'function');
+  assert.equal(response.routes.length, 1);
+});
+
+test('rejects MapKit callback failures, empty responses, and unavailable directions', async () => {
+  class Coordinate {
+    constructor(latitude, longitude) { Object.assign(this, { latitude, longitude }); }
+  }
+  class FailedDirections {
+    static Transport = { Automobile: 'AUTOMOBILE' };
+    route(_request, callback) { callback(new Error('service failed')); }
+  }
+  class EmptyDirections {
+    static Transport = { Automobile: 'AUTOMOBILE' };
+    route(_request, callback) { callback(null, null); }
+  }
+  await assert.rejects(requestAppleRoute({ Coordinate, Directions: FailedDirections }, position, destination), /service failed/);
+  await assert.rejects(requestAppleRoute({ Coordinate, Directions: EmptyDirections }, position, destination), /no directions response/);
+  await assert.rejects(requestAppleRoute({}, position, destination), /unavailable/);
 });
