@@ -46,9 +46,9 @@ function openMenu() {
   document.body.style.top = `-${menuScrollY}px`;
   document.body.classList.add('menu-open');
   setPageInert(true);
-  requestAnimationFrame(() => {
-    menuParent?.append(menu);
-  });
+  const reattachMenu = () => menuParent?.append(menu);
+  requestAnimationFrame(reattachMenu);
+  queueMicrotask(() => requestAnimationFrame(reattachMenu));
 }
 
 if (menuButton && menu) {

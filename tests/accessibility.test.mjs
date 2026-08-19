@@ -53,9 +53,10 @@ test('mobile navigation owns the viewport below the header', () => {
   assert.match(headerRule, /background: var\(--black\)/);
   assert.doesNotMatch(headerRule, /backdrop-filter|transform|perspective/);
   const layerMove = script.indexOf('document.body.append(menu)');
-  const layerRestore = script.indexOf('requestAnimationFrame(() => {', layerMove);
+  const layerRestore = script.indexOf('requestAnimationFrame(reattachMenu)', layerMove);
   assert.ok(layerMove >= 0 && layerRestore > layerMove);
-  assert.ok((script.match(/menuParent\?\.append\(menu\)/g)?.length ?? 0) >= 1);
+  assert.equal(script.match(/requestAnimationFrame\(reattachMenu\)/g)?.length, 2);
+  assert.match(script, /queueMicrotask\(\(\) => requestAnimationFrame\(reattachMenu\)\)/);
 });
 
 test('mobile navigation restores its opening scroll position when dismissed', () => {
