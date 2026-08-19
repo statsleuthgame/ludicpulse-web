@@ -26,6 +26,7 @@ body {
 }
 
 body.menu-open { position: fixed; right: 0; left: 0; width: 100%; overflow: hidden; }
+body.menu-open .site-header { backdrop-filter: none; -webkit-backdrop-filter: none; }
 img { display: block; max-width: 100%; }
 a { color: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
