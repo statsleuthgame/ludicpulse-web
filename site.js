@@ -1,26 +1,68 @@
 const menuButton = document.querySelector('[data-menu-button]');
 const menu = document.querySelector('[data-menu]');
 const header = document.querySelector('[data-header]');
+const pageRegions = [document.querySelector('main'), document.querySelector('footer')].filter(Boolean);
+let menuReturnFocus = null;
 
-function closeMenu() {
+function setPageInert(isInert) {
+  pageRegions.forEach(region => {
+    if (isInert) region.setAttribute('inert', '');
+    else region.removeAttribute('inert');
+  });
+}
+
+function closeMenu({ restoreFocus = false } = {}) {
   if (!menuButton || !menu) return;
   menuButton.setAttribute('aria-expanded', 'false');
   menuButton.querySelector('.sr-only').textContent = 'Open navigation';
   menu.classList.remove('is-open');
   document.body.classList.remove('menu-open');
+  setPageInert(false);
+  if (restoreFocus) menuReturnFocus?.focus();
+  menuReturnFocus = null;
+}
+
+function openMenu() {
+  if (!menuButton || !menu) return;
+  menuReturnFocus = document.activeElement;
+  menuButton.setAttribute('aria-expanded', 'true');
+  menuButton.querySelector('.sr-only').textContent = 'Close navigation';
+  menu.classList.add('is-open');
+  document.body.classList.add('menu-open');
+  setPageInert(true);
+  requestAnimationFrame(() => menu.querySelector('a')?.focus());
 }
 
 if (menuButton && menu) {
   menuButton.addEventListener('click', () => {
     const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
-    menuButton.setAttribute('aria-expanded', String(!isOpen));
-    menuButton.querySelector('.sr-only').textContent = isOpen ? 'Open navigation' : 'Close navigation';
-    menu.classList.toggle('is-open', !isOpen);
-    document.body.classList.toggle('menu-open', !isOpen);
+    if (isOpen) closeMenu({ restoreFocus: true });
+    else openMenu();
   });
 
   menu.addEventListener('click', event => {
     if (event.target.closest('a')) closeMenu();
+  });
+
+  document.addEventListener('keydown', event => {
+    if (menuButton.getAttribute('aria-expanded') !== 'true') return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMenu({ restoreFocus: true });
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const focusable = [menuButton, ...menu.querySelectorAll('a')];
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   });
 }
 
@@ -32,21 +74,12 @@ window.addEventListener('scroll', () => {
   header?.classList.toggle('scrolled', window.scrollY > 12);
 }, { passive: true });
 
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const reveals = document.querySelectorAll('.reveal');
-
-if (reducedMotion || !('IntersectionObserver' in window)) {
-  reveals.forEach(element => element.classList.add('is-visible'));
-} else {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-visible');
-      observer.unobserve(entry.target);
-    });
-  }, { rootMargin: '0px 0px -8% 0px', threshold: .12 });
-  reveals.forEach(element => observer.observe(element));
-}
+document.querySelectorAll('.skip-link').forEach(link => {
+  link.addEventListener('click', () => {
+    const target = document.querySelector(link.hash);
+    requestAnimationFrame(() => target?.focus({ preventScroll: true }));
+  });
+});
 
 document.querySelectorAll('[data-year]').forEach(element => {
   element.textContent = String(new Date().getFullYear());

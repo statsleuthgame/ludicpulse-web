@@ -16,5 +16,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: node --test tests/site.test.mjs eta/app.test.js eta/map-model.test.js
+      - run: node --test tests/site.test.mjs tests/content.test.mjs tests/accessibility.test.mjs eta/app.test.js eta/map-model.test.js
       - run: node --check site.js && node --check eta/app.js && node --check eta/map-model.js && node --check eta/verify-mapkit-browser.mjs

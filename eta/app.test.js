@@ -18,13 +18,12 @@ test('pins the MapKit runtime whose callback contract the page implements', () =
   assert.doesNotMatch(source, /\/mk\/5\.x\.x\/mapkit\.js/);
 });
 
-test('keeps the recipient page focused and advertises the shipped Ludic Pulse icon', () => {
+test('keeps the recipient page focused and uses company-level sharing metadata', () => {
   assert.doesNotMatch(pageSource, /class="details"|id="traffic"|id="freshness"|class="privacy"/);
   assert.doesNotMatch(source, /el\('traffic'\)|el\('freshness'\)/);
-  assert.match(pageSource, /rel="icon"[^>]+favicon\.png\?v=20260819-pulse/);
-  assert.match(pageSource, /rel="apple-touch-icon"[^>]+icon\.png\?v=20260819-pulse/);
-  assert.match(pageSource, /property="og:image" content="https:\/\/ludicpulse\.com\/icon\.png\?v=20260819-pulse"/);
-  assert.match(pageSource, /class="brand"><img src="\/icon\.png\?v=20260819-pulse"/);
+  assert.doesNotMatch(pageSource, /(?:icon|favicon)\.png/);
+  assert.match(pageSource, /property="og:image" content="https:\/\/ludicpulse\.com\/social-card\.png"/);
+  assert.match(pageSource, /class="brand"><span>Ludic Pulse<\/span>/);
 });
 
 function element() {

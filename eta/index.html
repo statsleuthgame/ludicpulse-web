@@ -10,20 +10,19 @@
   <meta property="og:description" content="Follow a privately shared Ludic Pulse trip ETA.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ludicpulse.com/eta/">
-  <meta property="og:image" content="https://ludicpulse.com/icon.png?v=20260819-pulse">
-  <meta property="og:image:width" content="1024">
-  <meta property="og:image:height" content="1024">
+  <meta property="og:image" content="https://ludicpulse.com/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.apple-mapkit.com; worker-src blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.apple-mapkit.com https://*.mzstatic.com; connect-src https://telem.statmask.com:8443 https://*.apple-mapkit.com https://*.ls.apple.com; font-src 'self'; base-uri 'none'; form-action 'none'">
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png?v=20260819-pulse">
-  <link rel="apple-touch-icon" href="/icon.png?v=20260819-pulse">
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/eta/styles.css?v=20260819-clean">
   <title>Shared ETA · Ludic Pulse</title>
 </head>
 <body>
   <noscript><p>JavaScript is required to open this private live ETA.</p></noscript>
   <main class="shell">
-    <header class="brand"><img src="/icon.png?v=20260819-pulse" alt="" width="32" height="32"><span>Ludic Pulse</span></header>
+    <header class="brand"><span>Ludic Pulse</span></header>
     <section id="loading" class="status" aria-live="polite">
       <div class="spinner" aria-hidden="true"></div>
       <h1>Opening private ETA…</h1>
@@ -37,7 +36,7 @@
         <div><strong id="arrival">—</strong><span>ARRIVAL</span></div>
         <div><strong id="countdown">—</strong><span>REMAINING</span></div>
       </div>
-      <div id="map-wrap" class="map-wrap" aria-label="Live route map">
+      <section id="map-wrap" class="map-wrap" aria-label="Live route map">
         <div id="map" class="map" hidden></div>
         <span id="route-source" class="route-source" role="status" aria-live="polite" hidden></span>
         <svg id="route-fallback" class="route" viewBox="0 0 700 420" role="img" aria-labelledby="route-title route-desc" hidden>
@@ -54,7 +53,7 @@
         </div>
         <div class="progress-labels"><span id="miles">— mi left</span><span id="battery">Arrival battery —</span></div>
         <div id="progress" class="progress" role="progressbar" aria-label="Trip progress" aria-valuemin="0" aria-valuemax="100"><span></span></div>
-      </div>
+      </section>
     </section>
     <section id="terminal" class="status" hidden aria-live="polite">
       <div class="terminal-icon" aria-hidden="true">✓</div>

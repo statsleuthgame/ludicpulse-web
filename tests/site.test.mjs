@@ -6,6 +6,7 @@ import test from 'node:test';
 const root = resolve(import.meta.dirname, '..');
 const pagePaths = [
   'index.html',
+  'pulse/index.html',
   'hub/index.html',
   'support/index.html',
   'privacy/index.html',
@@ -17,7 +18,7 @@ function read(relativePath) {
 }
 
 function localTarget(pagePath, value) {
-  if (/^(?:https?:|mailto:|tel:|#)/.test(value)) return null;
+  if (/^(?:https?:|mailto:|tel:|data:|#)/.test(value)) return null;
   const clean = value.split('#')[0].split('?')[0];
   if (!clean) return null;
   const target = clean.startsWith('/')
@@ -28,22 +29,30 @@ function localTarget(pagePath, value) {
 
 test('homepage communicates the company and both product roles', () => {
   const html = read('index.html');
-  assert.match(html, /Ludic Technologies builds software and hardware/);
+  assert.match(html, /Connected technology, built around the driver/);
   assert.match(html, /Ludic Pulse/);
   assert.match(html, /Ludic Hub/);
+  assert.match(html, /href="\/pulse\/"/);
   assert.match(html, /href="\/hub\/"/);
-  assert.match(html, /iPhone beta · United States/);
   assert.match(html, /not affiliated with, endorsed by, or sponsored by Tesla/);
+});
+
+test('Pulse has its own page and states the current product boundaries', () => {
+  const html = read('pulse/index.html');
+  assert.match(html, /Free US beta/);
+  assert.match(html, /authorized Tesla access/);
+  assert.match(html, /Ludic hardware is not required/);
+  assert.match(html, /Share ETA/);
+  assert.match(html, /aria-current="page">Pulse/);
 });
 
 test('Hub page is specific about capabilities without inventing launch facts', () => {
   const html = read('hub/index.html');
   assert.match(html, /In development/);
-  assert.match(html, /archive TeslaCam footage/);
+  assert.match(html, /archiving TeslaCam footage/);
   assert.match(html, /private Wi-Fi/);
-  assert.match(html, /Not announced/);
-  assert.match(html, /Retail price or release date/);
-  assert.match(html, /gap-free recording/);
+  assert.match(html, /price, and availability are not yet announced/);
+  assert.doesNotMatch(html, /gap-free recording|cloud-surveillance/i);
   assert.doesNotMatch(html, /available (?:now|today)|ships? (?:now|on)|\$\d+/i);
 });
 
@@ -60,12 +69,19 @@ test('all public pages include baseline accessibility structure', () => {
     const html = read(pagePath);
     assert.match(html, /<html lang="en">/, pagePath);
     assert.match(html, /class="skip-link" href="#main"/, pagePath);
-    assert.match(html, /<main id="main"/, pagePath);
+    assert.match(html, /<main id="main"[^>]*tabindex="-1"/, pagePath);
     assert.match(html, /aria-label="Main navigation"/, pagePath);
     assert.equal((html.match(/<h1\b/g) ?? []).length, 1, pagePath);
     for (const image of html.match(/<img\b[^>]*>/g) ?? []) {
       assert.match(image, /\balt="[^"]*"/, `${pagePath}: ${image}`);
     }
+  }
+});
+
+test('public HTML never displays or advertises the Pulse app icon', () => {
+  const publicPages = [...pagePaths, 'eta/index.html', 'auth/tesla/callback/index.html'];
+  for (const pagePath of publicPages) {
+    assert.doesNotMatch(read(pagePath), /(?:icon|favicon)\.png/i, pagePath);
   }
 });
 
@@ -83,6 +99,7 @@ test('local links and assets referenced by company pages resolve', () => {
 
 test('legal, support, Tesla, and Shared ETA routes remain present', () => {
   const required = [
+    'pulse/index.html',
     'support/index.html',
     'privacy/index.html',
     'terms/index.html',
