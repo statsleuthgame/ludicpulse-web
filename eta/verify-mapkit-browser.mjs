@@ -41,7 +41,8 @@ async function devtoolsTarget() {
   for (let attempt = 0; attempt < 50; attempt += 1) {
     try {
       const targets = await json(`http://127.0.0.1:${port}/json/list`);
-      if (targets[0]?.webSocketDebuggerUrl) return targets[0];
+      const page = targets.find((target) => target.type === 'page');
+      if (page?.webSocketDebuggerUrl) return page;
     } catch { /* Chrome is still starting. */ }
     await delay(100);
   }
@@ -81,16 +82,28 @@ async function connect(url) {
     }
     throw new Error(`Timed out waiting for ${method}.`);
   };
-  return { send, socket, waitFor };
+  return { events, send, socket, waitFor };
 }
 
 try {
   const target = await devtoolsTarget();
   const cdp = await connect(target.webSocketDebuggerUrl);
   await cdp.send('Page.enable');
+  await cdp.send('Network.enable');
   await cdp.send('Runtime.enable');
   await cdp.send('Page.navigate', { url: 'https://ludicpulse.com/' });
-  await cdp.waitFor('Page.loadEventFired');
+  let lastState;
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const state = await cdp.send('Runtime.evaluate', {
+      expression: '({ href: location.href, readyState: document.readyState })',
+      returnByValue: true,
+    });
+    lastState = state.result.value;
+    if (state.result.value?.href === 'https://ludicpulse.com/'
+      && state.result.value?.readyState === 'complete') break;
+    if (attempt === 99) throw new Error(`Production origin did not finish loading: ${JSON.stringify(lastState)}.`);
+    await delay(50);
+  }
 
   const expression = `
     (async () => {
@@ -126,8 +139,13 @@ try {
     userGesture: true,
   });
   if (evaluation.exceptionDetails) {
-    throw new Error(evaluation.exceptionDetails.exception?.description
-      ?? evaluation.exceptionDetails.text ?? 'Browser evaluation failed.');
+    const failures = cdp.events
+      .filter((event) => event.method === 'Network.loadingFailed')
+      .map((event) => event.params.errorText)
+      .join(', ');
+    const description = evaluation.exceptionDetails.exception?.description
+      ?? evaluation.exceptionDetails.text ?? 'Browser evaluation failed.';
+    throw new Error(`${description}${failures ? ` Network: ${failures}.` : ''}`);
   }
   const result = evaluation.result.value;
   if (result.version !== '5.81.65' || result.routes < 1 || !(result.distance > 0)) {
@@ -136,6 +154,8 @@ try {
   console.log(`MapKit ${result.version}: ${result.routes} real route(s), selected distance ${Math.round(result.distance)} m.`);
   cdp.socket.close();
 } finally {
+  const exited = new Promise((resolve) => chrome.once('exit', resolve));
   chrome.kill('SIGTERM');
-  await rm(profile, { recursive: true, force: true });
+  await Promise.race([exited, delay(2_000)]);
+  await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 }
