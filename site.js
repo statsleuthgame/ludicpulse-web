@@ -3,6 +3,7 @@ const menu = document.querySelector('[data-menu]');
 const header = document.querySelector('[data-header]');
 const pageRegions = [document.querySelector('main'), document.querySelector('footer')].filter(Boolean);
 let menuReturnFocus = null;
+let menuScrollY = 0;
 
 function setPageInert(isInert) {
   pageRegions.forEach(region => {
@@ -11,8 +12,11 @@ function setPageInert(isInert) {
   });
 }
 
-function closeMenu({ restoreFocus = false } = {}) {
+function closeMenu({ restoreFocus = false, restoreScroll = true } = {}) {
   if (!menuButton || !menu) return;
+  const wasOpen = menuButton.getAttribute('aria-expanded') === 'true';
+  if (!wasOpen) return;
+  const scrollYToRestore = menuScrollY;
   menuButton.setAttribute('aria-expanded', 'false');
   menuButton.querySelector('.sr-only').textContent = 'Open navigation';
   menu.classList.remove('is-open');
@@ -20,10 +24,13 @@ function closeMenu({ restoreFocus = false } = {}) {
   setPageInert(false);
   if (restoreFocus) menuReturnFocus?.focus();
   menuReturnFocus = null;
+  menuScrollY = 0;
+  if (restoreScroll) requestAnimationFrame(() => window.scrollTo(0, scrollYToRestore));
 }
 
 function openMenu() {
   if (!menuButton || !menu) return;
+  menuScrollY = window.scrollY;
   menuReturnFocus = document.activeElement;
   menuButton.setAttribute('aria-expanded', 'true');
   menuButton.querySelector('.sr-only').textContent = 'Close navigation';
@@ -41,7 +48,7 @@ if (menuButton && menu) {
   });
 
   menu.addEventListener('click', event => {
-    if (event.target.closest('a')) closeMenu();
+    if (event.target.closest('a')) closeMenu({ restoreScroll: false });
   });
 
   document.addEventListener('keydown', event => {

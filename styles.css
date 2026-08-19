@@ -340,33 +340,41 @@ h3 { font-size: 24px; line-height: 1.2; }
   .nav-shell { min-height: 68px; }
   .brand img { width: 164px; }
   .menu-button {
+    position: relative;
     display: grid;
     width: 44px;
     height: 44px;
-    place-content: center;
-    gap: 6px;
+    place-items: center;
     border: 0;
     background: transparent;
     color: var(--white);
   }
-  .menu-button span:not(.sr-only) { display: block; width: 22px; height: 1px; background: currentColor; transition: transform 160ms ease; }
-  .menu-button[aria-expanded="true"] span:nth-last-child(2) { transform: translateY(3.5px) rotate(45deg); }
-  .menu-button[aria-expanded="true"] span:last-child { transform: translateY(-3.5px) rotate(-45deg); }
+  .menu-button span:not(.sr-only) { position: absolute; display: block; width: 22px; height: 1px; background: currentColor; transition: transform 160ms ease; }
+  .menu-button span:nth-last-child(2) { transform: translateY(-4px); }
+  .menu-button span:last-child { transform: translateY(4px); }
+  .menu-button[aria-expanded="true"] span:nth-last-child(2) { transform: rotate(45deg); }
+  .menu-button[aria-expanded="true"] span:last-child { transform: rotate(-45deg); }
   .site-nav {
-    position: fixed;
-    top: 68px;
+    position: absolute;
+    z-index: 1;
+    top: 100%;
     right: 0;
-    bottom: 0;
+    bottom: auto;
     left: 0;
     display: none;
+    width: 100%;
+    height: calc(100vh - 68px);
+    height: calc(100dvh - 68px);
     align-content: start;
     align-items: stretch;
     gap: 0;
     padding: 28px 24px;
-    background: rgba(5, 5, 6, .98);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--black);
   }
   .site-nav.is-open { display: grid; }
-  .site-nav a { padding: 18px 0; border-bottom: 1px solid var(--line); font-size: 24px; }
+  .site-nav a { justify-content: flex-start; padding: 18px 0; border-bottom: 1px solid var(--line); font-size: 24px; }
   .site-nav a[aria-current="page"] { box-shadow: none; border-color: var(--green); }
   .company-hero { min-height: auto; padding-block: 64px 76px; }
   h1 { font-size: clamp(48px, 14vw, 72px); }

@@ -46,6 +46,18 @@ test('mobile navigation supports containment, Escape, and focus restoration', ()
   assert.match(script, /closeMenu\(\{ restoreFocus: true \}\)/);
 });
 
+test('mobile navigation owns the viewport below the header', () => {
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.site-nav \{[\s\S]*?position: absolute;[\s\S]*?top: 100%;[\s\S]*?height: calc\(100dvh - 68px\);[\s\S]*?overflow-y: auto;[\s\S]*?background: var\(--black\);/);
+  assert.doesNotMatch(css, /@media \(max-width: 760px\)[\s\S]*?\.site-nav \{[\s\S]*?position: fixed;/);
+});
+
+test('mobile navigation restores its opening scroll position when dismissed', () => {
+  assert.match(script, /menuScrollY = window\.scrollY/);
+  assert.match(script, /const scrollYToRestore = menuScrollY/);
+  assert.match(script, /window\.scrollTo\(0, scrollYToRestore\)/);
+  assert.match(script, /closeMenu\(\{ restoreScroll: false \}\)/);
+});
+
 test('named visual groups use supported semantic elements', () => {
   assert.doesNotMatch(read('index.html'), /<figure class="hero-mark|(?:icon|favicon)\.png/);
   assert.match(read('pulse/index.html'), /<figure class="pulse-device/);
