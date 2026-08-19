@@ -14,6 +14,15 @@ function setPageInert(isInert) {
   });
 }
 
+function rebuildHeaderLayer() {
+  if (!header) return;
+  header.style.removeProperty('backdrop-filter');
+  header.style.removeProperty('-webkit-backdrop-filter');
+  void header.offsetHeight;
+  header.style.setProperty('backdrop-filter', 'none');
+  header.style.setProperty('-webkit-backdrop-filter', 'none');
+}
+
 function closeMenu({ restoreFocus = false, restoreScroll = true } = {}) {
   if (!menuButton || !menu) return;
   const wasOpen = menuButton.getAttribute('aria-expanded') === 'true';
@@ -44,13 +53,12 @@ function openMenu() {
   menuScrollY = window.scrollY;
   menuReturnFocus = document.activeElement;
   document.body.append(menu);
-  header?.style.setProperty('backdrop-filter', 'none');
-  header?.style.setProperty('-webkit-backdrop-filter', 'none');
   menuButton.setAttribute('aria-expanded', 'true');
   menuButton.querySelector('.sr-only').textContent = 'Close navigation';
   menu.classList.add('is-open');
   document.body.style.top = `-${menuScrollY}px`;
   document.body.classList.add('menu-open');
+  rebuildHeaderLayer();
   setPageInert(true);
   requestAnimationFrame(() => menu.querySelector('a')?.focus());
 }
