@@ -1,7 +1,6 @@
 const menuButton = document.querySelector('[data-menu-button]');
 const menu = document.querySelector('[data-menu]');
 const menuParent = menu?.parentNode;
-const menuNextSibling = menu?.nextSibling;
 const header = document.querySelector('[data-header]');
 const pageRegions = [document.querySelector('main'), document.querySelector('footer')].filter(Boolean);
 let menuReturnFocus = null;
@@ -47,7 +46,7 @@ function openMenu() {
   document.body.style.top = `-${menuScrollY}px`;
   document.body.classList.add('menu-open');
   setPageInert(true);
-  setTimeout(() => menuParent?.insertBefore(menu, menuNextSibling), 0);
+  queueMicrotask(() => menuParent?.append(menu));
   requestAnimationFrame(() => menu.querySelector('a')?.focus());
 }
 
