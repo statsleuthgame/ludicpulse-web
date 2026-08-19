@@ -1,7 +1,11 @@
-# Ludic Pulse public site
+# Ludic Technologies public site
 
-Static marketing, support, privacy, Terms, Tesla public-key, and OAuth callback
-pages for `ludicpulse.com`.
+Static company marketing, Ludic Hub, support, privacy, Terms, Tesla public-key,
+OAuth callback, and Shared ETA pages for `ludicpulse.com`.
+
+The company homepage and `/hub/` are maintained directly in this repository.
+The approved wordmark and Pulse screenshots live in `assets/`; do not redraw the
+wordmark or replace it with generated lettering.
 
 The customer pages are generated from the cloud API's canonical public-page
 source so the deployed website and API copy stay aligned:
@@ -14,12 +18,15 @@ node node_modules/.pnpm/tsx@4.23.1/node_modules/tsx/dist/cli.mjs \
 ```
 
 After regeneration, preserve `CNAME`, `.nojekyll`, `.well-known/`, `auth/`,
-`icon.png`, `favicon.png`, and this README.
+`hub/`, `assets/`, `styles.css`, `site.js`, `social-card.png`, `icon.png`,
+`favicon.png`, and this README. Review regenerated root, support, privacy, and
+Terms pages before committing so the shared company navigation remains intact.
 
 Shared ETA website gates:
 
 ```bash
-node --test eta/app.test.js eta/map-model.test.js
+node --test tests/site.test.mjs eta/app.test.js eta/map-model.test.js
+node --check site.js
 MAPKIT_TEST_TOKEN=... node eta/verify-mapkit-browser.mjs
 ```
 
