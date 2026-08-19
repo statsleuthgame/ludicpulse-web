@@ -51,6 +51,7 @@ test('mobile navigation owns the viewport below the header', () => {
   assert.match(css, /body\.menu-open \.site-header \{[^}]*background: var\(--black\);[^}]*backdrop-filter: none;/);
   assert.match(script, /void header\.offsetHeight;/);
   assert.match(script, /header\.style\.setProperty\('backdrop-filter', 'none'\)/);
+  assert.match(script, /requestAnimationFrame\(rebuildHeaderLayer\)/);
   assert.match(script, /document\.body\.append\(menu\)/);
   assert.match(script, /menuParent\?\.insertBefore\(menu, menuNextSibling\)/);
 });

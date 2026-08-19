@@ -58,9 +58,11 @@ function openMenu() {
   menu.classList.add('is-open');
   document.body.style.top = `-${menuScrollY}px`;
   document.body.classList.add('menu-open');
-  rebuildHeaderLayer();
   setPageInert(true);
-  requestAnimationFrame(() => menu.querySelector('a')?.focus());
+  requestAnimationFrame(() => {
+    menu.querySelector('a')?.focus();
+    requestAnimationFrame(rebuildHeaderLayer);
+  });
 }
 
 if (menuButton && menu) {
