@@ -18,11 +18,16 @@ test('pins the MapKit runtime whose callback contract the page implements', () =
   assert.doesNotMatch(source, /\/mk\/5\.x\.x\/mapkit\.js/);
 });
 
-test('keeps the recipient page focused and uses company-level sharing metadata', () => {
+test('keeps the recipient page focused and exposes a no-install link preview', () => {
   assert.doesNotMatch(pageSource, /class="details"|id="traffic"|id="freshness"|class="privacy"/);
   assert.doesNotMatch(source, /el\('traffic'\)|el\('freshness'\)/);
   assert.doesNotMatch(pageSource, /(?:icon|favicon)\.png/);
+  assert.match(pageSource, /property="og:title" content="Live ETA · Ludic Pulse"/);
+  assert.match(pageSource, /property="og:description" content="Tap to follow the private live trip\. No app or sign-in required\."/);
   assert.match(pageSource, /property="og:image" content="https:\/\/ludicpulse\.com\/social-card\.png"/);
+  assert.match(pageSource, /name="twitter:card" content="summary_large_image"/);
+  assert.match(pageSource, /rel="canonical" href="https:\/\/ludicpulse\.com\/eta\/"/);
+  assert.doesNotMatch(pageSource, /#[A-Za-z0-9_-]{40,80}/);
   assert.match(pageSource, /class="brand"><span>Ludic Pulse<\/span>/);
 });
 
