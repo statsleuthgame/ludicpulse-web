@@ -72,11 +72,24 @@ test('named visual groups use supported semantic elements', () => {
   assert.doesNotMatch(read('index.html'), /<figure class="hero-mark|(?:icon|favicon)\.png/);
   assert.match(read('pulse/index.html'), /<figure class="pulse-device/);
   assert.match(read('pulse/index.html'), /<figcaption/);
-  assert.match(read('hub/index.html'), /<figure class="hub-system[^>]*aria-labelledby/);
-  assert.match(read('hub/index.html'), /<figcaption/);
+  assert.match(read('hub/index.html'), /<ol class="hub-flow[^>]*aria-label/);
+  assert.match(read('pulse/index.html'), /<div class="screen-preview-grid[^>]*role="group"[^>]*aria-label/);
   for (const pagePath of pagePaths) {
-    assert.doesNotMatch(read(pagePath), /<div[^>]*aria-label=/, pagePath);
+    assert.doesNotMatch(read(pagePath), /<div(?![^>]*role="group")[^>]*aria-label=/, pagePath);
   }
+});
+
+test('mobile product headlines use a bounded size and can wrap safely', () => {
+  assert.match(css, /h1, h2, h3 \{ overflow-wrap: break-word; \}/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.subpage-hero h1 \{ font-size: clamp\(42px, 11\.5vw, 58px\); \}/);
+});
+
+test('mobile privacy tables retain their column labels', () => {
+  const privacy = read('privacy/index.html');
+  for (const label of ['Category', 'Examples', 'Purpose', 'Data', 'Retention']) {
+    assert.match(privacy, new RegExp(`data-label="${label}"`));
+  }
+  assert.match(css, /td\[data-label\]::before[^}]*content: attr\(data-label\)/);
 });
 
 test('shared interactive controls expose accessible target sizing', () => {

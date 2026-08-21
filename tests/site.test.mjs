@@ -29,7 +29,7 @@ function localTarget(pagePath, value) {
 
 test('homepage communicates the company and both product roles', () => {
   const html = read('index.html');
-  assert.match(html, /Connected technology, built around the driver/);
+  assert.match(html, /Tesla data on your phone/);
   assert.match(html, /Ludic Pulse/);
   assert.match(html, /Ludic Hub/);
   assert.match(html, /href="\/pulse\/"/);
@@ -40,9 +40,9 @@ test('homepage communicates the company and both product roles', () => {
 test('Pulse has its own page and states the current product boundaries', () => {
   const html = read('pulse/index.html');
   assert.match(html, /Free US beta/);
-  assert.match(html, /authorized Tesla access/);
+  assert.match(html, /Tesla's authorization flow/);
   assert.match(html, /Ludic hardware is not required/);
-  assert.match(html, /Share ETA/);
+  assert.match(html, /Shared ETA/);
   assert.match(html, /aria-current="page">Pulse/);
 });
 
@@ -51,9 +51,16 @@ test('Hub page is specific about capabilities without inventing launch facts', (
   assert.match(html, /In development/);
   assert.match(html, /archiving TeslaCam footage/);
   assert.match(html, /private Wi-Fi/);
-  assert.match(html, /price, and availability are not yet announced/);
+  assert.match(html, /price, and availability have not been announced/);
   assert.doesNotMatch(html, /gap-free recording|cloud-surveillance/i);
   assert.doesNotMatch(html, /available (?:now|today)|ships? (?:now|on)|\$\d+/i);
+});
+
+test('product pages avoid repeated numbered-card marketing templates', () => {
+  for (const pagePath of ['pulse/index.html', 'hub/index.html']) {
+    const html = read(pagePath);
+    assert.doesNotMatch(html, /capability-grid|capability-card/, pagePath);
+  }
 });
 
 test('brand system uses the locked colors and exact approved wordmark asset', () => {

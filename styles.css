@@ -138,6 +138,7 @@ main[tabindex="-1"]:focus { outline: none; }
 }
 
 h1, h2, h3, p { margin-top: 0; }
+h1, h2, h3 { overflow-wrap: break-word; }
 
 h1 {
   max-width: 780px;
@@ -220,7 +221,7 @@ h3 { font-size: 24px; line-height: 1.2; }
 
 .product-card {
   display: flex;
-  min-height: 410px;
+  min-height: 260px;
   flex-direction: column;
   padding: clamp(28px, 4vw, 46px);
   border: 1px solid var(--line);
@@ -233,7 +234,7 @@ h3 { font-size: 24px; line-height: 1.2; }
 .product-card li + li { margin-top: 10px; }
 .product-card .text-link { margin-top: auto; }
 
-.product-link-card { min-height: 300px; }
+.product-link-card { min-height: 260px; }
 
 .pulse-device { display: grid; min-height: 650px; margin: 0; place-items: center; }
 .phone.phone-single { position: relative; top: auto; left: auto; width: min(100%, 340px); }
@@ -250,11 +251,6 @@ h3 { font-size: 24px; line-height: 1.2; }
 }
 
 .phone img { width: 100%; height: auto; }
-
-.hub-device { position: absolute; z-index: 3; top: 50%; left: 50%; width: 190px; height: 108px; transform: translate(-50%, -50%); border: 1px solid var(--line-bright); background: #101114; box-shadow: 0 26px 56px rgba(0,0,0,.55); }
-.hub-device::before { position: absolute; inset: 8px; border: 1px solid #202329; content: ""; }
-.hub-device span { position: absolute; top: 17px; left: 17px; font-size: 12px; font-weight: 800; letter-spacing: .16em; }
-.hub-device i { position: absolute; right: 18px; bottom: 18px; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
 
 .closing,
 .hub-status { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 64px; align-items: end; }
@@ -278,32 +274,29 @@ h3 { font-size: 24px; line-height: 1.2; }
 .js .reveal { opacity: 1; transform: none; }
 
 .subpage-hero { min-height: 650px; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 80px; padding-block: 100px; }
+.subpage-hero > * { min-width: 0; }
 .subpage-hero h1 { font-size: clamp(54px, 7vw, 92px); }
-.hub-system { position: relative; min-height: 470px; margin: 0; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.hub-system .hub-device { width: 240px; height: 136px; }
-.system-label { position: absolute; color: var(--dim); font: 12px/1 ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; }
-.label-input { top: 19%; left: 8%; }
-.label-output { right: 5%; bottom: 18%; }
-.system-axis-x { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: var(--line); }
-.system-axis-y { position: absolute; top: 0; left: 50%; width: 1px; height: 100%; background: var(--line); }
-.system-packet { position: absolute; top: calc(50% - 3px); width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: packet 4s linear infinite; }
-@keyframes packet { from { left: 8%; } to { left: 90%; } }
+.hub-flow { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.hub-flow li { display: grid; grid-template-columns: 44px 1fr; gap: 18px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+.hub-flow span { color: var(--green); font: 12px/1.6 ui-monospace, monospace; }
+.hub-flow strong { display: block; margin-bottom: 4px; font-size: 20px; }
+.hub-flow p { margin: 0; color: var(--muted); }
 
-.system-caption { position: absolute; right: 0; bottom: -34px; color: var(--dim); font-size: 13px; }
+.feature-layout { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(44px, 7vw, 92px); margin-top: 64px; align-items: start; }
+.feature-list { margin: 0; border-top: 1px solid var(--line); }
+.feature-row { display: grid; grid-template-columns: minmax(120px, .65fr) 1.35fr; gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+.feature-row dt { font-weight: 720; }
+.feature-row dd { margin: 0; color: var(--muted); }
 
-.capability-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  margin-top: 64px;
-  border: 1px solid var(--line);
-  background: var(--line);
-}
+.screen-preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.screen-preview { margin: 0; }
+.screen-preview img { width: 100%; aspect-ratio: 9 / 13; object-fit: cover; object-position: top; border: 1px solid var(--line); border-radius: 24px; background: var(--surface); }
+.screen-preview figcaption { margin-top: 12px; color: var(--dim); font-size: 13px; }
 
-.capability-card { min-height: 270px; padding: 34px; background: var(--black); }
-.capability-card > span { color: var(--green); font: 12px/1 ui-monospace, monospace; }
-.capability-card h3 { margin: 58px 0 12px; font-size: 26px; }
-.capability-card p { margin: 0; color: var(--muted); }
+.boundary-list { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.boundary-list li { padding-left: 18px; border-left: 2px solid var(--green); }
+.boundary-list strong { display: block; margin-bottom: 3px; }
+.boundary-list span { color: var(--muted); }
 
 
 .content-main { width: min(calc(100% - 48px), 900px); margin-inline: auto; padding: 84px 0 110px; }
@@ -319,6 +312,9 @@ h3 { font-size: 24px; line-height: 1.2; }
 .content-main .card { margin: 28px 0; padding: 26px; border: 1px solid var(--line); background: var(--surface); }
 .content-main .card p:last-child { margin-bottom: 0; }
 .content-main .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.content-main .setup-list { margin: 26px 0; padding: 0; list-style: none; counter-reset: setup; border-top: 1px solid var(--line); }
+.content-main .setup-list li { position: relative; padding: 20px 0 20px 48px; border-bottom: 1px solid var(--line); counter-increment: setup; }
+.content-main .setup-list li::before { position: absolute; top: 20px; left: 0; color: var(--green); font: 12px/1.6 ui-monospace, monospace; content: "0" counter(setup); }
 .content-main table { width: 100%; margin: 22px 0; border-collapse: collapse; }
 .content-main th,
 .content-main td { padding: 15px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
@@ -326,7 +322,7 @@ h3 { font-size: 24px; line-height: 1.2; }
 
 @media (max-width: 980px) {
   .subpage-hero { grid-template-columns: 1fr; }
-  .hub-system { width: min(100%, 650px); }
+  .hub-flow { width: min(100%, 650px); }
   .pulse-device { min-height: 620px; }
 }
 
@@ -377,7 +373,8 @@ h3 { font-size: 24px; line-height: 1.2; }
   .site-nav a { justify-content: flex-start; padding: 18px 0; border-bottom: 1px solid var(--line); font-size: 24px; }
   .site-nav a[aria-current="page"] { box-shadow: none; border-color: var(--green); }
   .company-hero { min-height: auto; padding-block: 64px 76px; }
-  h1 { font-size: clamp(48px, 14vw, 72px); }
+  h1 { font-size: clamp(44px, 12vw, 60px); line-height: 1.02; letter-spacing: -.045em; }
+  .subpage-hero h1 { font-size: clamp(42px, 11.5vw, 58px); }
   h2 { font-size: clamp(36px, 10vw, 52px); }
   .hero-actions { align-items: flex-start; flex-direction: column; }
   .section-heading,
@@ -388,12 +385,13 @@ h3 { font-size: 24px; line-height: 1.2; }
   .closing,
   .hub-status { padding-block: 76px; }
   .product-grid,
-  .capability-grid { grid-template-columns: 1fr; }
+  .feature-layout { grid-template-columns: 1fr; }
   .product-card { min-height: 0; }
   .pulse-device { min-height: 560px; }
   .phone.phone-single { width: min(72vw, 300px); }
   .closing-actions { justify-content: flex-start; margin-top: 34px; }
   .footer-shell { flex-direction: column; }
+  .feature-row { grid-template-columns: 1fr; gap: 6px; }
   .content-main .grid { grid-template-columns: 1fr; }
   .content-main table,
   .content-main thead,
@@ -404,13 +402,15 @@ h3 { font-size: 24px; line-height: 1.2; }
   .content-main thead { display: none; }
   .content-main tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
   .content-main td { padding: 8px 0; border: 0; }
+  .content-main td[data-label]::before { display: block; margin-bottom: 4px; color: var(--dim); font-size: 11px; font-weight: 720; letter-spacing: .1em; text-transform: uppercase; content: attr(data-label); }
 }
 
 @media (max-width: 480px) {
   .company-hero { padding-block: 48px 64px; }
   .pulse-device { min-height: 520px; }
   .phone.phone-single { width: min(72vw, 280px); }
-  .hub-device { width: 150px; height: 88px; }
+  .screen-preview-grid { gap: 10px; }
+  .screen-preview img { border-radius: 18px; }
   .closing-actions { align-items: flex-start; flex-direction: column; }
 }
 
