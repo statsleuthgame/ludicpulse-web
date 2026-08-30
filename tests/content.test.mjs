@@ -69,12 +69,15 @@ test('Hub stays concise and distinguishes present direction from launch facts', 
   const main = mainMarkup(read('hub/index.html'));
   assert.equal((main.match(/<section\b/g) ?? []).length, 3);
   assert.ok(wordCount(main) <= 240, `Hub has ${wordCount(main)} words`);
-  assert.match(main, /Keep TeslaCam footage local/);
+  assert.match(main, /Keep dashcam footage up to x10 longer/);
+  assert.match(main, /automatically archive dashcam footage to your flash drive/);
+  assert.match(main, /view saved footage directly from the app/);
+  assert.match(main, /class="hub-phone-preview reveal" aria-hidden="true"/);
   assert.match(main, /Archive/);
   assert.match(main, /Browse/);
   assert.match(main, /Transfer/);
   assert.match(main, /have not been announced and may change/);
-  assert.doesNotMatch(main, /hub-device|system-packet|finally organized|Built locally\. Still taking shape/i);
+  assert.doesNotMatch(main, /hub-flow|Get Hub updates|See Pulse|hub-device|system-packet|finally organized|Built locally\. Still taking shape/i);
 });
 
 test('support leads with actionable setup and omits the duplicated generated stylesheet', () => {
@@ -110,7 +113,7 @@ test('hardware marketing stays isolated to the Hub page', () => {
     'privacy/index.html', 'terms/index.html', 'beta/index.html']) {
     assert.doesNotMatch(read(pagePath), /optional hardware|hardware is not required|No hardware purchase|required hardware/i, pagePath);
   }
-  assert.match(read('hub/index.html'), /optional hardware/i);
+  assert.match(read('hub/index.html'), /development hardware/i);
 });
 
 test('beta page stays focused on the two-field signup decision', () => {

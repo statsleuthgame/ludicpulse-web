@@ -49,7 +49,8 @@ test('Pulse route remains available without duplicate homepage messaging', () =>
 test('Hub page is specific about capabilities without inventing launch facts', () => {
   const html = read('hub/index.html');
   assert.match(html, /In development/);
-  assert.match(html, /archiving TeslaCam footage/);
+  assert.match(html, /automatically archive dashcam footage to your flash drive/);
+  assert.match(html, /view saved footage directly from the app/);
   assert.match(html, /private Wi-Fi/);
   assert.match(html, /price, and availability have not been announced/);
   assert.doesNotMatch(html, /gap-free recording|cloud-surveillance/i);

@@ -72,10 +72,17 @@ test('named visual groups use supported semantic elements', () => {
   assert.doesNotMatch(read('index.html'), /<figure class="hero-mark|(?:icon|favicon)\.png/);
   assert.match(read('index.html'), /<figure class="pulse-carousel[^>]*aria-roledescription="carousel"/);
   assert.match(read('pulse/index.html'), /<figcaption/);
-  assert.match(read('hub/index.html'), /<ol class="hub-flow[^>]*aria-label/);
+  assert.match(read('hub/index.html'), /<figure class="hub-phone-preview reveal" aria-hidden="true">/);
   for (const pagePath of pagePaths) {
     assert.doesNotMatch(read(pagePath), /<div(?![^>]*role="(?:group|region)")[^>]*aria-label=/, pagePath);
   }
+});
+
+test('blurred Hub teasers are visual-only and non-interactive', () => {
+  const hub = read('hub/index.html');
+  assert.equal((hub.match(/class="[^"]*hub-teaser-blur[^"]*" aria-hidden="true"/g) ?? []).length, 2);
+  assert.match(css, /\.hub-teaser-blur \{[^}]*filter: blur\(10px\);[^}]*pointer-events: none;[^}]*user-select: none;/);
+  assert.doesNotMatch(hub, /Get Hub updates|See Pulse|mailto:support@ludicpulse\.com\?subject=Ludic%20Hub%20updates/);
 });
 
 test('mobile product headlines use a bounded size and can wrap safely', () => {
