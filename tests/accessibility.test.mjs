@@ -84,6 +84,12 @@ test('mobile product headlines use a bounded size and can wrap safely', () => {
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.subpage-hero h1 \{ font-size: clamp\(42px, 11\.5vw, 58px\); \}/);
 });
 
+test('Pulse hero starts near the divided site header', () => {
+  assert.match(css, /\.site-header \{[\s\S]*?border-bottom: 1px solid rgba\(245, 244, 241, \.34\)/);
+  assert.match(css, /\.pulse-hero \{[^}]*align-items: start;[^}]*padding-block: 48px 72px;/);
+  assert.match(css, /\.pulse-hero > \.reveal:first-child \{[^}]*padding-top: 12px;/);
+});
+
 test('mobile privacy tables retain their column labels', () => {
   const privacy = read('privacy/index.html');
   for (const label of ['Category', 'Examples', 'Purpose', 'Data', 'Retention']) {

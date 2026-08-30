@@ -61,7 +61,7 @@ main[tabindex="-1"]:focus { outline: none; }
   position: sticky;
   z-index: 50;
   top: 0;
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid rgba(245, 244, 241, .34);
   background: var(--black);
   transition: border-color 180ms ease;
   max-width: none;
@@ -69,7 +69,7 @@ main[tabindex="-1"]:focus { outline: none; }
   padding: 0;
 }
 
-.site-header.scrolled { border-color: var(--line); }
+.site-header.scrolled { border-color: rgba(245, 244, 241, .34); }
 
 .nav-shell,
 .section-shell,
@@ -375,6 +375,8 @@ h3 { font-size: 24px; line-height: 1.2; }
 .subpage-hero { min-height: 650px; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 80px; padding-block: 100px; }
 .subpage-hero > * { min-width: 0; }
 .subpage-hero h1 { font-size: clamp(54px, 7vw, 92px); }
+.pulse-hero { min-height: 0; align-items: start; padding-block: 48px 72px; }
+.pulse-hero > .reveal:first-child { padding-top: 12px; }
 .hub-flow { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
 .hub-flow li { display: grid; grid-template-columns: 44px 1fr; gap: 18px; padding: 24px 0; border-bottom: 1px solid var(--line); }
 .hub-flow span { color: var(--green); font: 12px/1.6 ui-monospace, monospace; }
