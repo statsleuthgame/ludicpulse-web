@@ -70,12 +70,12 @@ test('mobile navigation restores its opening scroll position when dismissed', ()
 
 test('named visual groups use supported semantic elements', () => {
   assert.doesNotMatch(read('index.html'), /<figure class="hero-mark|(?:icon|favicon)\.png/);
-  assert.match(read('pulse/index.html'), /<figure class="pulse-device/);
+  assert.match(read('index.html'), /<figure class="pulse-carousel[^>]*aria-roledescription="carousel"/);
   assert.match(read('pulse/index.html'), /<figcaption/);
   assert.match(read('hub/index.html'), /<ol class="hub-flow[^>]*aria-label/);
-  assert.match(read('pulse/index.html'), /<div class="screen-preview-grid[^>]*role="group"[^>]*aria-label/);
+  assert.match(read('pulse/index.html'), /<div class="screen-reel[^>]*role="region"[^>]*aria-label/);
   for (const pagePath of pagePaths) {
-    assert.doesNotMatch(read(pagePath), /<div(?![^>]*role="group")[^>]*aria-label=/, pagePath);
+    assert.doesNotMatch(read(pagePath), /<div(?![^>]*role="(?:group|region)")[^>]*aria-label=/, pagePath);
   }
 });
 
@@ -99,4 +99,13 @@ test('shared interactive controls expose accessible target sizing', () => {
   assert.match(css, /\.menu-button \{[\s\S]*?width: 44px;[\s\S]*?height: 44px/);
   assert.match(css, /\.nav-beta \{[\s\S]*?min-height: 42px/);
   assert.match(css, /\.form-fields input \{[\s\S]*?min-height: 56px/);
+  assert.match(css, /\.carousel-controls button \{[\s\S]*?width: 44px;[\s\S]*?height: 44px/);
+});
+
+test('screen carousel pauses for users and respects reduced motion', () => {
+  assert.match(script, /prefers-reduced-motion: reduce/);
+  assert.match(script, /carousel\.addEventListener\('pointerenter', stop\)/);
+  assert.match(script, /carousel\.addEventListener\('focusin', stop\)/);
+  assert.match(script, /setAttribute\('aria-hidden'/);
+  assert.match(script, /setAttribute\('aria-current'/);
 });

@@ -107,6 +107,78 @@ document.querySelectorAll('[data-year]').forEach(element => {
   element.textContent = String(new Date().getFullYear());
 });
 
+document.querySelectorAll('[data-screen-carousel]').forEach(carousel => {
+  const screens = [...carousel.querySelectorAll('.carousel-screen')];
+  const label = carousel.querySelector('[data-screen-label]');
+  const count = carousel.querySelector('[data-screen-count]');
+  const previous = carousel.querySelector('[data-screen-previous]');
+  const next = carousel.querySelector('[data-screen-next]');
+  const dots = carousel.querySelector('[data-screen-dots]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let activeIndex = 0;
+  let timer;
+
+  const dotButtons = screens.map((screen, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.setAttribute('aria-label', `Show ${screen.dataset.screenTitle}`);
+    button.addEventListener('click', () => {
+      showScreen(index);
+      restart();
+    });
+    dots?.append(button);
+    return button;
+  });
+
+  function showScreen(index) {
+    activeIndex = (index + screens.length) % screens.length;
+    screens.forEach((screen, screenIndex) => {
+      const isActive = screenIndex === activeIndex;
+      screen.classList.toggle('is-active', isActive);
+      screen.setAttribute('aria-hidden', String(!isActive));
+    });
+    dotButtons.forEach((button, dotIndex) => {
+      button.setAttribute('aria-current', String(dotIndex === activeIndex));
+    });
+    if (label) label.textContent = screens[activeIndex]?.dataset.screenTitle ?? '';
+    if (count) count.textContent = `${activeIndex + 1} of ${screens.length}`;
+  }
+
+  function stop() {
+    window.clearInterval(timer);
+    timer = undefined;
+  }
+
+  function start() {
+    if (reduceMotion.matches || document.hidden || timer) return;
+    timer = window.setInterval(() => showScreen(activeIndex + 1), 4500);
+  }
+
+  function restart() {
+    stop();
+    start();
+  }
+
+  previous?.addEventListener('click', () => {
+    showScreen(activeIndex - 1);
+    restart();
+  });
+  next?.addEventListener('click', () => {
+    showScreen(activeIndex + 1);
+    restart();
+  });
+  carousel.addEventListener('pointerenter', stop);
+  carousel.addEventListener('pointerleave', start);
+  carousel.addEventListener('focusin', stop);
+  carousel.addEventListener('focusout', event => {
+    if (!carousel.contains(event.relatedTarget)) start();
+  });
+  reduceMotion.addEventListener('change', restart);
+  document.addEventListener('visibilitychange', restart);
+  showScreen(0);
+  start();
+});
+
 const betaForm = document.querySelector('[data-beta-form]');
 
 if (betaForm) {

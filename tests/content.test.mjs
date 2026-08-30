@@ -22,29 +22,24 @@ function wordCount(html) {
     .filter(Boolean).length;
 }
 
-test('homepage is a concise company gateway to separate product pages', () => {
+test('root page is the complete Pulse landing page', () => {
   const main = mainMarkup(read('index.html'));
   assert.equal((main.match(/<section\b/g) ?? []).length, 3);
-  assert.ok(wordCount(main) <= 180, `homepage has ${wordCount(main)} words`);
-  assert.match(main, /Tesla data on your phone/);
-  assert.match(main, /Pulse is the app\. Hub is optional hardware/);
-  assert.match(main, /href="\/pulse\/"/);
-  assert.match(main, /href="\/hub\/"/);
-  assert.doesNotMatch(main, /class="hero-mark|(?:icon|favicon)\.png/i);
-  assert.doesNotMatch(main, /Connected technology|Choose where you want to go|Clear products\. Clear boundaries/i);
+  assert.ok(wordCount(main) <= 260, `homepage has ${wordCount(main)} words`);
+  assert.match(main, /Your Tesla, clearly remembered/);
+  assert.match(main, /data-screen-carousel/);
+  assert.equal((main.match(/class="carousel-screen/g) ?? []).length, 9);
+  assert.doesNotMatch(main, /Products|optional hardware|Free US beta/i);
 });
 
-test('Pulse stays concise while covering the app essentials', () => {
+test('legacy Pulse route mirrors the root landing page', () => {
   const main = mainMarkup(read('pulse/index.html'));
-  assert.equal((main.match(/<section\b/g) ?? []).length, 3);
-  assert.ok(wordCount(main) <= 240, `Pulse has ${wordCount(main)} words`);
-  assert.match(main, /accepted requests from confirmed changes/);
-  assert.match(main, /Drives and charging/);
+  assert.equal(read('pulse/index.html'), read('index.html'));
+  assert.match(main, /confirmed physical change/);
+  assert.match(main, /Drive history/);
+  assert.match(main, /Charging Live Activity/);
   assert.match(main, /Shared ETA/);
-  assert.match(main, /hardware is not required/);
-  assert.match(main, /pulse-charging\.png/);
-  assert.match(main, /pulse-insights\.png/);
-  assert.doesNotMatch(main, /capability-card|The information you need, without the noise/i);
+  assert.doesNotMatch(main, /hardware/i);
 });
 
 test('Hub stays concise and distinguishes present direction from launch facts', () => {
@@ -82,8 +77,17 @@ test('primary navigation contains only the three user destinations', () => {
     const html = read(pagePath);
     const nav = html.match(/<nav id="site-nav"[\s\S]*?<\/nav>/)?.[0] ?? '';
     assert.equal((nav.match(/<a\b/g) ?? []).length, 3, pagePath);
+    assert.match(nav, /href="\/"[^>]*>Pulse/, pagePath);
     assert.doesNotMatch(nav, /Why Ludic|principles/, pagePath);
   }
+});
+
+test('hardware marketing stays isolated to the Hub page', () => {
+  for (const pagePath of ['index.html', 'pulse/index.html', 'support/index.html',
+    'privacy/index.html', 'terms/index.html', 'beta/index.html']) {
+    assert.doesNotMatch(read(pagePath), /optional hardware|hardware is not required|No hardware purchase|required hardware/i, pagePath);
+  }
+  assert.match(read('hub/index.html'), /optional hardware/i);
 });
 
 test('beta page stays focused on the two-field signup decision', () => {

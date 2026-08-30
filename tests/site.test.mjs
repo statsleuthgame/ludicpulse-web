@@ -28,23 +28,22 @@ function localTarget(pagePath, value) {
   return clean.endsWith('/') ? join(target, 'index.html') : target;
 }
 
-test('homepage communicates the company and both product roles', () => {
+test('homepage leads directly with Ludic Pulse', () => {
   const html = read('index.html');
-  assert.match(html, /Tesla data on your phone/);
+  const main = html.match(/<main\b[\s\S]*?<\/main>/)?.[0] ?? '';
+  assert.match(main, /Your Tesla, clearly remembered/);
   assert.match(html, /Ludic Pulse/);
-  assert.match(html, /Ludic Hub/);
-  assert.match(html, /href="\/pulse\/"/);
-  assert.match(html, /href="\/hub\/"/);
+  assert.doesNotMatch(main, /Ludic Hub|Products/);
   assert.match(html, /not affiliated with, endorsed by, or sponsored by Tesla/);
 });
 
-test('Pulse has its own page and states the current product boundaries', () => {
+test('Pulse route remains available without duplicate homepage messaging', () => {
   const html = read('pulse/index.html');
-  assert.match(html, /Free US beta/);
-  assert.match(html, /Tesla's authorization flow/);
-  assert.match(html, /Ludic hardware is not required/);
+  assert.match(html, /Your Tesla, clearly remembered/);
+  assert.match(html, /Tesla’s authorization flow/);
   assert.match(html, /Shared ETA/);
-  assert.match(html, /aria-current="page">Pulse/);
+  assert.match(html, /href="\/" aria-current="page">Pulse/);
+  assert.doesNotMatch(html, /Free US beta|hardware/i);
 });
 
 test('Hub page is specific about capabilities without inventing launch facts', () => {
@@ -70,6 +69,19 @@ test('brand system uses the locked colors and exact approved wordmark asset', ()
   assert.match(css, /--blue: #378add;/);
   assert.ok(existsSync(join(root, 'assets/ludic-technologies-wordmark.png')));
   assert.ok(existsSync(join(root, 'social-card.png')));
+});
+
+test('Pulse showcase uses every approved real capture at native proportions', () => {
+  const html = read('index.html');
+  for (const filename of [
+    '01-car.png', '02-drives.png', '03-charging.png', '04-charging-lockscreen.jpg',
+    '05-share-eta.png', '06-share-eta-message.png', '07-recipient-eta.png',
+    '08-driving-lockscreen.jpg', '09-destination.png',
+  ]) {
+    assert.ok(existsSync(join(root, 'assets/screens/showcase', filename)), filename);
+    assert.match(html, new RegExp(filename.replace('.', '\\.')));
+  }
+  assert.doesNotMatch(html, /pulse-charging\.png|pulse-insights\.png|screen-preview-grid/);
 });
 
 test('all public pages include baseline accessibility structure', () => {
