@@ -78,11 +78,13 @@ test('named visual groups use supported semantic elements', () => {
   }
 });
 
-test('blurred Hub teasers are visual-only and non-interactive', () => {
+test('Hub teaser skeletons contain no inspectable product copy', () => {
   const hub = read('hub/index.html');
-  assert.equal((hub.match(/class="[^"]*hub-teaser-blur[^"]*" aria-hidden="true"/g) ?? []).length, 2);
-  assert.match(css, /\.hub-teaser-blur \{[^}]*filter: blur\(10px\);[^}]*pointer-events: none;[^}]*user-select: none;/);
-  assert.doesNotMatch(hub, /Get Hub updates|See Pulse|mailto:support@ludicpulse\.com\?subject=Ludic%20Hub%20updates/);
+  const skeletons = [...hub.matchAll(/<section class="[^"]*hub-skeleton-section[^"]*" aria-hidden="true">([\s\S]*?)<\/section>/g)];
+  assert.equal(skeletons.length, 2);
+  for (const skeleton of skeletons) assert.equal(skeleton[1].replace(/<[^>]+>/g, '').trim(), '');
+  assert.match(css, /\.hub-skeleton-section \{[^}]*filter: blur\(9px\);[^}]*pointer-events: none;[^}]*user-select: none;/);
+  assert.doesNotMatch(hub, /What Hub adds|planned workflow|Archive|Browse|Transfer|Development status|No price or release date/);
 });
 
 test('mobile product headlines use a bounded size and can wrap safely', () => {

@@ -384,7 +384,17 @@ h3 { font-size: 24px; line-height: 1.2; }
 .hub-phone-preview { display: grid; margin: 0; place-items: center; }
 .hub-preview-phone img { display: block; filter: blur(18px) saturate(.55); transform: scale(1.12); }
 .hub-preview-phone::after { position: absolute; inset: 0; background: rgba(5, 5, 6, .24); content: ""; }
-.hub-teaser-blur { filter: blur(10px); opacity: .34; pointer-events: none; user-select: none; }
+.hub-skeleton-section { padding-block: 88px; border-top: 1px solid var(--line); filter: blur(9px); opacity: .3; pointer-events: none; user-select: none; }
+.hub-skeleton-canvas { display: grid; max-width: 980px; gap: 22px; }
+.hub-skeleton-canvas span { display: block; height: 18px; border-radius: 999px; background: #a3a29e; }
+.hub-skeleton-canvas span:nth-child(1) { width: 18%; height: 12px; background: var(--green); }
+.hub-skeleton-canvas span:nth-child(2) { width: 62%; height: 54px; background: #e4e2dc; }
+.hub-skeleton-canvas span:nth-child(3) { width: 94%; }
+.hub-skeleton-canvas span:nth-child(4) { width: 82%; }
+.hub-skeleton-canvas span:nth-child(5) { width: 91%; }
+.hub-skeleton-canvas span:nth-child(6) { width: 68%; }
+.hub-skeleton-section-compact { padding-block: 64px; }
+.hub-skeleton-section-compact .hub-skeleton-canvas span:nth-child(2) { width: 54%; height: 46px; }
 
 .feature-layout { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(44px, 7vw, 92px); margin-top: 64px; align-items: start; }
 .feature-list { margin: 0; border-top: 1px solid var(--line); }

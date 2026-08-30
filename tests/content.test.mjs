@@ -73,11 +73,8 @@ test('Hub stays concise and distinguishes present direction from launch facts', 
   assert.match(main, /automatically archive dashcam footage to your flash drive/);
   assert.match(main, /view saved footage directly from the app/);
   assert.match(main, /class="hub-phone-preview reveal" aria-hidden="true"/);
-  assert.match(main, /Archive/);
-  assert.match(main, /Browse/);
-  assert.match(main, /Transfer/);
-  assert.match(main, /have not been announced and may change/);
-  assert.doesNotMatch(main, /hub-flow|Get Hub updates|See Pulse|hub-device|system-packet|finally organized|Built locally\. Still taking shape/i);
+  assert.equal((main.match(/<section class="[^"]*hub-skeleton-section[^"]*"/g) ?? []).length, 2);
+  assert.doesNotMatch(main, /Transfer|private Wi-Fi|price or release date|hub-flow|Get Hub updates|See Pulse|hub-device|system-packet|finally organized|Built locally\. Still taking shape/i);
 });
 
 test('support leads with actionable setup and omits the duplicated generated stylesheet', () => {
@@ -113,7 +110,7 @@ test('hardware marketing stays isolated to the Hub page', () => {
     'privacy/index.html', 'terms/index.html', 'beta/index.html']) {
     assert.doesNotMatch(read(pagePath), /optional hardware|hardware is not required|No hardware purchase|required hardware/i, pagePath);
   }
-  assert.match(read('hub/index.html'), /development hardware/i);
+  assert.match(read('hub/index.html'), /Ludic Hub · In development/i);
 });
 
 test('beta page stays focused on the two-field signup decision', () => {

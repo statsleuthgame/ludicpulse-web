@@ -51,8 +51,8 @@ test('Hub page is specific about capabilities without inventing launch facts', (
   assert.match(html, /In development/);
   assert.match(html, /automatically archive dashcam footage to your flash drive/);
   assert.match(html, /view saved footage directly from the app/);
-  assert.match(html, /private Wi-Fi/);
-  assert.match(html, /price, and availability have not been announced/);
+  assert.equal((html.match(/class="hub-skeleton-canvas"/g) ?? []).length, 2);
+  assert.doesNotMatch(html, /private Wi-Fi|price, and availability|What Hub adds|planned workflow/);
   assert.doesNotMatch(html, /gap-free recording|cloud-surveillance/i);
   assert.doesNotMatch(html, /available (?:now|today)|ships? (?:now|on)|\$\d+/i);
 });
