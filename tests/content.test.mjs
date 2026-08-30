@@ -26,7 +26,7 @@ test('root page is the complete Pulse landing page', () => {
   const main = mainMarkup(read('index.html'));
   assert.equal((main.match(/<section\b/g) ?? []).length, 2);
   assert.ok(wordCount(main) <= 260, `homepage has ${wordCount(main)} words`);
-  assert.match(main, /Your Tesla, clearly remembered/);
+  assert.match(main, /Every drive\. Every charge\. Anytime\./);
   assert.match(main, /data-screen-carousel/);
   assert.equal((main.match(/class="carousel-screen/g) ?? []).length, 9);
   assert.doesNotMatch(main, /Products|optional hardware|Free US beta/i);

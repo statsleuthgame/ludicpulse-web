@@ -31,7 +31,7 @@ function localTarget(pagePath, value) {
 test('homepage leads directly with Ludic Pulse', () => {
   const html = read('index.html');
   const main = html.match(/<main\b[\s\S]*?<\/main>/)?.[0] ?? '';
-  assert.match(main, /Your Tesla, clearly remembered/);
+  assert.match(main, /Every drive\. Every charge\. Anytime\./);
   assert.match(html, /Ludic Pulse/);
   assert.doesNotMatch(main, /Ludic Hub|Products/);
   assert.match(html, /not affiliated with, endorsed by, or sponsored by Tesla/);
@@ -39,7 +39,7 @@ test('homepage leads directly with Ludic Pulse', () => {
 
 test('Pulse route remains available without duplicate homepage messaging', () => {
   const html = read('pulse/index.html');
-  assert.match(html, /Your Tesla, clearly remembered/);
+  assert.match(html, /Every drive\. Every charge\. Anytime\./);
   assert.match(html, /Tesla’s authorization flow/);
   assert.match(html, /Shared ETA/);
   assert.match(html, /href="\/" aria-current="page">Pulse/);
