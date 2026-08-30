@@ -318,8 +318,9 @@ h3 { font-size: 24px; line-height: 1.2; }
   transition: opacity 420ms ease;
 }
 .carousel-screen.is-active { z-index: 1; opacity: 1; }
-.carousel-caption { display: flex; width: min(100%, 420px); justify-content: space-between; margin-top: 20px; color: var(--muted); font-size: 13px; }
+.carousel-caption { position: relative; display: grid; width: min(100%, 420px); place-items: center; margin-top: 20px; color: var(--muted); font-size: 13px; text-align: center; }
 .carousel-caption strong { color: var(--white); font-weight: 720; }
+.carousel-caption span { position: absolute; right: 0; }
 .carousel-controls { display: flex; width: min(100%, 420px); align-items: center; justify-content: center; gap: 16px; margin-top: 12px; }
 .carousel-controls button {
   display: grid;

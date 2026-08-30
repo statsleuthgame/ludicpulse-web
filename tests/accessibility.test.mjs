@@ -119,4 +119,6 @@ test('screen carousel pauses for users and respects reduced motion', () => {
   assert.match(script, /carousel\.addEventListener\('focusin', stop\)/);
   assert.match(script, /setAttribute\('aria-hidden'/);
   assert.match(script, /setAttribute\('aria-current'/);
+  assert.match(css, /\.carousel-caption \{[^}]*place-items: center;[^}]*text-align: center;/);
+  assert.match(css, /\.carousel-caption span \{[^}]*position: absolute;[^}]*right: 0;/);
 });
