@@ -34,6 +34,12 @@ test('beta form uses the owned endpoint and explains the narrow data use', () =>
   assert.match(html, /role="status"[^>]*aria-live="polite"/);
 });
 
+test('privacy policy discloses the beta notification email processor', () => {
+  const privacy = read('privacy/index.html');
+  assert.match(privacy, /<strong>Resend<\/strong>/);
+  assert.match(privacy, /name, email address, and submission time/);
+});
+
 test('beta behavior sends only the two requested fields and handles every state', () => {
   const script = read('site.js');
   assert.match(script, /data-beta-form/);
