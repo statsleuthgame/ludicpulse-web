@@ -73,7 +73,6 @@ test('named visual groups use supported semantic elements', () => {
   assert.match(read('index.html'), /<figure class="pulse-carousel[^>]*aria-roledescription="carousel"/);
   assert.match(read('pulse/index.html'), /<figcaption/);
   assert.match(read('hub/index.html'), /<ol class="hub-flow[^>]*aria-label/);
-  assert.match(read('pulse/index.html'), /<div class="screen-reel[^>]*role="region"[^>]*aria-label/);
   for (const pagePath of pagePaths) {
     assert.doesNotMatch(read(pagePath), /<div(?![^>]*role="(?:group|region)")[^>]*aria-label=/, pagePath);
   }

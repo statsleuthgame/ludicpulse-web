@@ -396,31 +396,6 @@ h3 { font-size: 24px; line-height: 1.2; }
 .hero-feature-list .feature-row { grid-template-columns: minmax(92px, .45fr) 1.55fr; gap: 18px; padding: 16px 0; }
 .hero-feature-list dt,
 .hero-feature-list dd { font-size: 15px; line-height: 1.45; }
-.screen-gallery-section { padding-block: 64px 104px; border-top: 1px solid var(--line); }
-.screen-reel {
-  display: flex;
-  gap: 18px;
-  margin-top: 64px;
-  padding: 4px 4px 24px;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scrollbar-color: var(--green) var(--surface);
-}
-.screen-reel:focus-visible { outline: 2px solid var(--green); outline-offset: 6px; }
-.screen-reel figure { width: clamp(230px, 24vw, 300px); flex: 0 0 auto; margin: 0; scroll-snap-align: start; }
-.screen-reel img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 828 / 1800;
-  border: 1px solid var(--line);
-  border-radius: 28px;
-  background: var(--surface);
-  object-fit: contain;
-}
-.screen-reel figcaption { margin-top: 12px; color: var(--muted); font-size: 13px; }
-
 .boundary-list { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
 .boundary-list li { padding-left: 18px; border-left: 2px solid var(--green); }
 .boundary-list strong { display: block; margin-bottom: 3px; }
@@ -677,7 +652,6 @@ h3 { font-size: 24px; line-height: 1.2; }
   .feature-row { grid-template-columns: 1fr; gap: 6px; }
   .hero-inside { margin-top: 38px; }
   .hero-feature-list .feature-row { padding: 14px 0; }
-  .screen-reel { margin-right: -16px; }
   .content-main .grid { grid-template-columns: 1fr; }
   .beta-hero { min-height: 0; padding-block: 62px 84px; }
   .beta-trust li { grid-template-columns: 1fr; gap: 4px; }
@@ -701,8 +675,6 @@ h3 { font-size: 24px; line-height: 1.2; }
   .phone.phone-single { width: min(72vw, 280px); }
   .carousel-caption,
   .carousel-controls { width: min(100%, 320px); }
-  .screen-reel figure { width: 72vw; max-width: 280px; }
-  .screen-reel img { border-radius: 24px; }
   .closing-actions { align-items: flex-start; flex-direction: column; }
 }
 

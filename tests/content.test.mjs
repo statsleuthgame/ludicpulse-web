@@ -24,12 +24,21 @@ function wordCount(html) {
 
 test('root page is the complete Pulse landing page', () => {
   const main = mainMarkup(read('index.html'));
-  assert.equal((main.match(/<section\b/g) ?? []).length, 3);
+  assert.equal((main.match(/<section\b/g) ?? []).length, 2);
   assert.ok(wordCount(main) <= 260, `homepage has ${wordCount(main)} words`);
   assert.match(main, /Your Tesla, clearly remembered/);
   assert.match(main, /data-screen-carousel/);
   assert.equal((main.match(/class="carousel-screen/g) ?? []).length, 9);
   assert.doesNotMatch(main, /Products|optional hardware|Free US beta/i);
+});
+
+test('Pulse ends with a concise local-data privacy statement', () => {
+  const main = mainMarkup(read('index.html'));
+  const privacy = main.match(/<section class="hub-status[\s\S]*?<\/section>/)?.[0] ?? '';
+  assert.doesNotMatch(main, /screen-gallery-section|screen-reel/);
+  assert.doesNotMatch(privacy, /Built around your data|Read the privacy policy/);
+  assert.match(privacy, /personal data is stored locally for data privacy and integrity\./);
+  assert.match(privacy, /href="\/beta\/">Join the private beta/);
 });
 
 test('legacy Pulse route mirrors the root landing page', () => {
