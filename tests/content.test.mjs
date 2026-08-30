@@ -35,11 +35,20 @@ test('root page is the complete Pulse landing page', () => {
 test('legacy Pulse route mirrors the root landing page', () => {
   const main = mainMarkup(read('pulse/index.html'));
   assert.equal(read('pulse/index.html'), read('index.html'));
-  assert.match(main, /confirmed physical change/);
+  assert.match(main, /confirmed command feedback/);
   assert.match(main, /Drive history/);
   assert.match(main, /Charging Live Activity/);
   assert.match(main, /Shared ETA/);
   assert.doesNotMatch(main, /hardware/i);
+});
+
+test('Inside the app fills the hero with four single-row product areas', () => {
+  const main = mainMarkup(read('index.html'));
+  const inside = main.match(/<div id="inside-pulse"[\s\S]*?<\/dl>\s*<\/div>/)?.[0] ?? '';
+  assert.match(inside, /Inside the app/);
+  assert.equal((inside.match(/class="feature-row"/g) ?? []).length, 4);
+  for (const area of ['Car', 'Drives', 'Charging', 'Shared ETA']) assert.match(inside, new RegExp(`<dt>${area}<\\/dt>`));
+  assert.doesNotMatch(main, /The full picture, without the noise|hero-actions/);
 });
 
 test('Hub stays concise and distinguishes present direction from launch facts', () => {

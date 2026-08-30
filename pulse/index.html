@@ -20,8 +20,8 @@
   <link rel="preload" href="/assets/ludic-technologies-wordmark.png" as="image">
   <link rel="preload" href="/assets/screens/showcase/01-car.png" as="image">
   <script>document.documentElement.classList.add('js')</script>
-  <link rel="stylesheet" href="/styles.css?v=20260829-tight-hero-v1">
-  <script defer src="/site.js?v=20260829-tight-hero-v1"></script>
+  <link rel="stylesheet" href="/styles.css?v=20260829-hero-features-v1">
+  <script defer src="/site.js?v=20260829-hero-features-v1"></script>
   <title>Ludic Pulse — Tesla status, drives, charging, and ETA</title>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Ludic Pulse","applicationCategory":"UtilitiesApplication","operatingSystem":"iOS","url":"https://ludicpulse.com/","publisher":{"@type":"Organization","name":"Ludic Technologies LLC"}}</script>
 </head>
@@ -40,10 +40,18 @@
 
   <main id="main" tabindex="-1">
     <section class="subpage-hero pulse-hero section-shell">
-      <div class="reveal">
+      <div class="hero-copy reveal">
         <h1>Your Tesla, clearly remembered.</h1>
         <p class="hero-lede">Ludic Pulse keeps vehicle status, charging, drives, efficiency, Live Activities, and private Shared ETA together in one focused iPhone app.</p>
-        <div class="hero-actions"><a class="button button-primary" href="/beta/">Join the private beta</a><a class="text-link" href="#inside-pulse">See inside Pulse</a></div>
+        <div id="inside-pulse" class="hero-inside">
+          <p class="eyebrow">Inside the app</p>
+          <dl class="feature-list hero-feature-list">
+            <div class="feature-row"><dt>Car</dt><dd>Live status and confirmed command feedback.</dd></div>
+            <div class="feature-row"><dt>Drives</dt><dd>Routes, distance, time, efficiency, and battery history.</dd></div>
+            <div class="feature-row"><dt>Charging</dt><dd>Energy, power, cost, targets, and Lock Screen progress.</dd></div>
+            <div class="feature-row"><dt>Shared ETA</dt><dd>A private live trip link that opens in any browser.</dd></div>
+          </dl>
+        </div>
       </div>
 
       <figure class="pulse-carousel reveal" data-screen-carousel aria-label="Ludic Pulse screen showcase" aria-roledescription="carousel">
@@ -69,18 +77,7 @@
       </figure>
     </section>
 
-    <section id="inside-pulse" class="section-shell product-intro" aria-labelledby="pulse-capabilities-title">
-      <div class="section-heading reveal">
-        <p class="eyebrow">Inside the app</p>
-        <h2 id="pulse-capabilities-title">The full picture, without the noise.</h2>
-      </div>
-      <dl class="feature-list pulse-feature-list reveal">
-        <div class="feature-row"><dt>Car</dt><dd>Current vehicle state and clear feedback that separates an accepted request from a confirmed physical change.</dd></div>
-        <div class="feature-row"><dt>Drives</dt><dd>Every recorded drive with route context, distance, time, efficiency, battery use, and longer-term patterns.</dd></div>
-        <div class="feature-row"><dt>Charging</dt><dd>Sessions, energy, power, targets, cost, battery behavior, and Live Activity progress on the Lock Screen.</dd></div>
-        <div class="feature-row"><dt>Shared ETA</dt><dd>A private, time-limited trip link with live arrival context that opens in any browser—no app or sign-in required.</dd></div>
-      </dl>
-
+    <section class="section-shell screen-gallery-section">
       <div class="screen-reel reveal" role="region" aria-label="Ludic Pulse app and Lock Screen captures" tabindex="0">
         <figure><img src="/assets/screens/showcase/01-car.png" alt="Ludic Pulse Car screen" width="828" height="1800" loading="lazy"><figcaption>Car status</figcaption></figure>
         <figure><img src="/assets/screens/showcase/02-drives.png" alt="Ludic Pulse Drives screen" width="828" height="1800" loading="lazy"><figcaption>Drive history</figcaption></figure>
