@@ -102,6 +102,17 @@ test('shared interactive controls expose accessible target sizing', () => {
   assert.match(css, /\.carousel-controls button \{[\s\S]*?width: 44px;[\s\S]*?height: 44px/);
 });
 
+test('desktop footer stays compact with navigation on one row', () => {
+  for (const pagePath of pagePaths) {
+    const footer = read(pagePath).match(/<footer class="site-footer"[\s\S]*?<\/footer>/)?.[0] ?? '';
+    assert.match(footer, /class="footer-brand"/, pagePath);
+    assert.match(footer, /class="footer-content"/, pagePath);
+  }
+  assert.match(css, /\.site-footer \{[^}]*padding: 32px 0;/);
+  assert.match(css, /\.footer-shell nav \{[^}]*display: flex;[^}]*flex-wrap: nowrap;[^}]*justify-content: flex-end;/);
+  assert.doesNotMatch(css, /\.footer-shell nav \{[^}]*grid-template-columns/);
+});
+
 test('screen carousel pauses for users and respects reduced motion', () => {
   assert.match(script, /prefers-reduced-motion: reduce/);
   assert.match(script, /carousel\.addEventListener\('pointerenter', stop\)/);
