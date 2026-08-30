@@ -250,7 +250,7 @@ h3 { font-size: 24px; line-height: 1.2; }
 
 .product-intro,
 .closing { padding-block: 104px; border-top: 1px solid var(--line); }
-.hub-status { padding-block: 64px; border-top: 1px solid var(--line); }
+.hub-status { padding-block: 40px; border-top: 1px solid var(--line); }
 
 .section-heading { display: grid; grid-template-columns: .65fr 1.35fr; column-gap: 56px; }
 .section-heading .eyebrow { grid-row: 1 / span 2; padding-top: 10px; }
@@ -351,12 +351,14 @@ h3 { font-size: 24px; line-height: 1.2; }
 }
 .carousel-dots button[aria-current="true"] { background: var(--green); transform: scale(1.25); }
 
-.closing,
-.hub-status { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 64px; align-items: end; }
+.closing { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 64px; align-items: end; }
+.hub-status { display: block; }
 .closing h2,
 .hub-status h2 { margin-bottom: 14px; }
+.hub-status h2 { font-size: clamp(38px, 4.4vw, 58px); white-space: nowrap; }
 .closing p:not(.eyebrow),
 .hub-status p:not(.eyebrow) { max-width: 680px; margin-bottom: 0; color: var(--muted); font-size: 18px; }
+.hub-status p:not(.eyebrow) { max-width: 1120px; }
 .closing-actions { display: flex; align-items: center; justify-content: flex-end; gap: 24px; }
 
 .site-footer { max-width: none; margin: 0; padding: 32px 0; border-top: 1px solid var(--line); background: #080809; }
@@ -396,6 +398,7 @@ h3 { font-size: 24px; line-height: 1.2; }
 .hero-feature-list .feature-row { grid-template-columns: minmax(92px, .45fr) 1.55fr; gap: 18px; padding: 16px 0; }
 .hero-feature-list dt,
 .hero-feature-list dd { font-size: 15px; line-height: 1.45; }
+.inside-beta-action { margin-top: 24px; }
 .boundary-list { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
 .boundary-list li { padding-left: 18px; border-left: 2px solid var(--green); }
 .boundary-list strong { display: block; margin-bottom: 3px; }
@@ -636,7 +639,8 @@ h3 { font-size: 24px; line-height: 1.2; }
   .section-heading .eyebrow { padding-top: 0; }
   .product-intro,
   .closing { padding-block: 76px; }
-  .hub-status { padding-block: 52px; }
+  .hub-status { padding-block: 36px; }
+  .hub-status h2 { white-space: normal; }
   .product-grid,
   .feature-layout { grid-template-columns: 1fr; }
   .product-card { min-height: 0; }

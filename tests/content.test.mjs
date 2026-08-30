@@ -38,7 +38,7 @@ test('Pulse ends with a concise local-data privacy statement', () => {
   assert.doesNotMatch(main, /screen-gallery-section|screen-reel/);
   assert.doesNotMatch(privacy, /Built around your data|Read the privacy policy/);
   assert.match(privacy, /personal data is stored locally for data privacy and integrity\./);
-  assert.match(privacy, /href="\/beta\/">Join the private beta/);
+  assert.doesNotMatch(privacy, /Join the private beta/);
 });
 
 test('legacy Pulse route mirrors the root landing page', () => {
@@ -53,7 +53,7 @@ test('legacy Pulse route mirrors the root landing page', () => {
 
 test('Inside the app fills the hero with four single-row product areas', () => {
   const main = mainMarkup(read('index.html'));
-  const inside = main.match(/<div id="inside-pulse"[\s\S]*?<\/dl>\s*<\/div>/)?.[0] ?? '';
+  const inside = main.match(/<div id="inside-pulse"[\s\S]*?<div class="inside-beta-action">[\s\S]*?<\/div>\s*<\/div>/)?.[0] ?? '';
   assert.match(inside, /Inside the app/);
   assert.equal((inside.match(/class="feature-row"/g) ?? []).length, 4);
   for (const area of ['Car', 'Drives', 'Charging', 'Shared ETA']) assert.match(inside, new RegExp(`<dt>${area}<\\/dt>`));
@@ -61,6 +61,7 @@ test('Inside the app fills the hero with four single-row product areas', () => {
   assert.match(inside, /Live Activity progress on the Lock Screen/);
   assert.match(inside, /opens in any browser\. No app or sign-in required\./);
   assert.doesNotMatch(inside, /—/);
+  assert.match(inside, /<\/dl>\s*<div class="inside-beta-action"><a class="button button-primary" href="\/beta\/">Join the private beta<\/a><\/div>/);
   assert.doesNotMatch(main, /The full picture, without the noise|hero-actions/);
 });
 

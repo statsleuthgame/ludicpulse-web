@@ -90,8 +90,10 @@ test('Pulse hero starts near the divided site header', () => {
 });
 
 test('Pulse privacy close uses compact balanced spacing', () => {
-  assert.match(css, /\.hub-status \{ padding-block: 64px; border-top: 1px solid var\(--line\); \}/);
-  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.hub-status \{ padding-block: 52px; \}/);
+  assert.match(css, /\.hub-status \{ padding-block: 40px; border-top: 1px solid var\(--line\); \}/);
+  assert.match(css, /\.hub-status h2 \{ font-size: clamp\(38px, 4\.4vw, 58px\); white-space: nowrap; \}/);
+  assert.match(css, /\.hub-status p:not\(\.eyebrow\) \{ max-width: 1120px; \}/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.hub-status \{ padding-block: 36px; \}[\s\S]*?\.hub-status h2 \{ white-space: normal; \}/);
 });
 
 test('mobile privacy tables retain their column labels', () => {

@@ -6,11 +6,12 @@ import test from 'node:test';
 const root = resolve(import.meta.dirname, '..');
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 
-test('homepage keeps beta access in the header while the hero stays editorial', () => {
+test('homepage exposes beta access in the header and after the Inside the app rows', () => {
   const html = read('index.html');
   assert.match(html, /class="nav-beta" href="\/beta\/"/);
   const hero = html.match(/<section class="subpage-hero[\s\S]*?<\/section>/)?.[0] ?? '';
-  assert.doesNotMatch(hero, /Join the private beta|See inside Pulse|hero-actions/);
+  assert.match(hero, /<div class="inside-beta-action"><a class="button button-primary" href="\/beta\/">Join the private beta<\/a><\/div>/);
+  assert.doesNotMatch(hero, /See inside Pulse|hero-actions/);
 });
 
 test('beta page collects exactly name and email from people', () => {
