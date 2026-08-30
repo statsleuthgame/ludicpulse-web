@@ -20,8 +20,8 @@
   <link rel="preload" href="/assets/ludic-technologies-wordmark.png" as="image">
   <link rel="preload" href="/assets/screens/showcase/01-car.png" as="image">
   <script>document.documentElement.classList.add('js')</script>
-  <link rel="stylesheet" href="/styles.css?v=20260829-hero-features-v1">
-  <script defer src="/site.js?v=20260829-hero-features-v1"></script>
+  <link rel="stylesheet" href="/styles.css?v=20260829-carousel-count-v1">
+  <script defer src="/site.js?v=20260829-carousel-count-v1"></script>
   <title>Ludic Pulse — Tesla status, drives, charging, and ETA</title>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Ludic Pulse","applicationCategory":"UtilitiesApplication","operatingSystem":"iOS","url":"https://ludicpulse.com/","publisher":{"@type":"Organization","name":"Ludic Technologies LLC"}}</script>
 </head>
@@ -68,10 +68,13 @@
             <img class="carousel-screen" data-screen-title="Active destination" src="/assets/screens/showcase/09-destination.png" alt="Ludic Pulse destination screen showing route status and arrival details" width="828" height="1800" aria-hidden="true">
           </div>
         </div>
-        <figcaption class="carousel-caption"><strong data-screen-label>Car status</strong><span data-screen-count>1 of 9</span></figcaption>
+        <figcaption class="carousel-caption"><strong data-screen-label>Car status</strong></figcaption>
         <div class="carousel-controls" role="group" aria-label="Screen controls">
           <button type="button" data-screen-previous aria-label="Show previous screen">←</button>
-          <div class="carousel-dots" data-screen-dots role="group" aria-label="Choose a screen"></div>
+          <div class="carousel-position">
+            <div class="carousel-dots" data-screen-dots role="group" aria-label="Choose a screen"></div>
+            <span class="carousel-count" data-screen-count>1 of 9</span>
+          </div>
           <button type="button" data-screen-next aria-label="Show next screen">→</button>
         </div>
       </figure>

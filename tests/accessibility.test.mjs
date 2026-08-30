@@ -126,5 +126,7 @@ test('screen carousel pauses for users and respects reduced motion', () => {
   assert.match(script, /setAttribute\('aria-hidden'/);
   assert.match(script, /setAttribute\('aria-current'/);
   assert.match(css, /\.carousel-caption \{[^}]*place-items: center;[^}]*text-align: center;/);
-  assert.match(css, /\.carousel-caption span \{[^}]*position: absolute;[^}]*right: 0;/);
+  assert.match(css, /\.carousel-position \{[^}]*justify-items: center;[^}]*gap: 8px;/);
+  const carousel = read('index.html').match(/<figure class="pulse-carousel[\s\S]*?<\/figure>/)?.[0] ?? '';
+  assert.match(carousel, /class="carousel-dots"[\s\S]*class="carousel-count" data-screen-count/);
 });

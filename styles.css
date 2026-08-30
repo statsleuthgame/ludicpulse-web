@@ -318,9 +318,8 @@ h3 { font-size: 24px; line-height: 1.2; }
   transition: opacity 420ms ease;
 }
 .carousel-screen.is-active { z-index: 1; opacity: 1; }
-.carousel-caption { position: relative; display: grid; width: min(100%, 420px); place-items: center; margin-top: 20px; color: var(--muted); font-size: 13px; text-align: center; }
+.carousel-caption { display: grid; width: min(100%, 420px); place-items: center; margin-top: 20px; color: var(--muted); font-size: 13px; text-align: center; }
 .carousel-caption strong { color: var(--white); font-weight: 720; }
-.carousel-caption span { position: absolute; right: 0; }
 .carousel-controls { display: flex; width: min(100%, 420px); align-items: center; justify-content: center; gap: 16px; margin-top: 12px; }
 .carousel-controls button {
   display: grid;
@@ -338,6 +337,8 @@ h3 { font-size: 24px; line-height: 1.2; }
 .carousel-controls button:hover,
 .carousel-controls button:focus-visible { border-color: var(--green); }
 .carousel-dots { display: flex; align-items: center; justify-content: center; gap: 7px; }
+.carousel-position { display: grid; min-width: 150px; justify-items: center; gap: 8px; }
+.carousel-count { color: var(--muted); font-size: 12px; line-height: 1; }
 .carousel-dots button {
   width: 8px;
   min-width: 8px;
