@@ -65,6 +65,11 @@ test('Inside the app fills the hero with four single-row product areas', () => {
   assert.doesNotMatch(main, /The full picture, without the noise|hero-actions/);
 });
 
+test('Shared ETA carousel sequence shows the message thread before the recipient route', () => {
+  const main = mainMarkup(read('index.html'));
+  assert.match(main, /data-screen-title="ETA message thread" src="\/assets\/screens\/showcase\/06-share-eta-message\.png"[\s\S]*data-screen-title="Recipient route" src="\/assets\/screens\/showcase\/07-recipient-eta\.png"/);
+});
+
 test('Hub stays concise and distinguishes present direction from launch facts', () => {
   const main = mainMarkup(read('hub/index.html'));
   assert.equal((main.match(/<section\b/g) ?? []).length, 3);
