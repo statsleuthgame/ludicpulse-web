@@ -6,7 +6,7 @@ import test from 'node:test';
 const root = resolve(import.meta.dirname, '..');
 const css = readFileSync(resolve(root, 'styles.css'), 'utf8');
 const script = readFileSync(resolve(root, 'site.js'), 'utf8');
-const pagePaths = ['index.html', 'pulse/index.html', 'hub/index.html', 'support/index.html', 'privacy/index.html', 'terms/index.html'];
+const pagePaths = ['index.html', 'pulse/index.html', 'hub/index.html', 'support/index.html', 'privacy/index.html', 'terms/index.html', 'beta/index.html'];
 
 function read(relativePath) {
   return readFileSync(resolve(root, relativePath), 'utf8');
@@ -97,4 +97,6 @@ test('shared interactive controls expose accessible target sizing', () => {
   assert.match(css, /\.text-link \{[\s\S]*?min-height: 44px/);
   assert.match(css, /\.footer-shell a \{[^}]*min-height: 44px/);
   assert.match(css, /\.menu-button \{[\s\S]*?width: 44px;[\s\S]*?height: 44px/);
+  assert.match(css, /\.nav-beta \{[\s\S]*?min-height: 42px/);
+  assert.match(css, /\.form-fields input \{[\s\S]*?min-height: 56px/);
 });

@@ -3,7 +3,7 @@
 Static company marketing, Ludic Hub, support, privacy, Terms, Tesla public-key,
 OAuth callback, and Shared ETA pages for `ludicpulse.com`.
 
-The company homepage, `/pulse/`, and `/hub/` are maintained directly in this repository.
+The company homepage, `/pulse/`, `/hub/`, and `/beta/` are maintained directly in this repository.
 The approved wordmark and Pulse screenshots live in `assets/`; do not redraw the
 wordmark or replace it with generated lettering.
 
@@ -18,7 +18,7 @@ node node_modules/.pnpm/tsx@4.23.1/node_modules/tsx/dist/cli.mjs \
 ```
 
 After regeneration, preserve `CNAME`, `.nojekyll`, `.well-known/`, `auth/`,
-`pulse/`, `hub/`, `assets/`, `styles.css`, `site.js`, `social-card.png`, `icon.png`,
+`pulse/`, `hub/`, `beta/`, `assets/`, `styles.css`, `site.js`, `social-card.png`, `icon.png`,
 `favicon.png`, and this README. Review regenerated root, support, privacy, and
 Terms pages before committing so the shared company navigation remains intact.
 The Pulse app-icon files remain release assets only; public HTML must not

@@ -78,10 +78,19 @@ test('legal pages keep their substantive disclosures without duplicated page CSS
 });
 
 test('primary navigation contains only the three user destinations', () => {
-  for (const pagePath of ['index.html', 'pulse/index.html', 'hub/index.html', 'support/index.html', 'privacy/index.html', 'terms/index.html']) {
+  for (const pagePath of ['index.html', 'pulse/index.html', 'hub/index.html', 'support/index.html', 'privacy/index.html', 'terms/index.html', 'beta/index.html']) {
     const html = read(pagePath);
     const nav = html.match(/<nav id="site-nav"[\s\S]*?<\/nav>/)?.[0] ?? '';
     assert.equal((nav.match(/<a\b/g) ?? []).length, 3, pagePath);
     assert.doesNotMatch(nav, /Why Ludic|principles/, pagePath);
   }
+});
+
+test('beta page stays focused on the two-field signup decision', () => {
+  const main = mainMarkup(read('beta/index.html'));
+  assert.equal((main.match(/<section\b/g) ?? []).length, 1);
+  assert.ok(wordCount(main) <= 150, `Beta page has ${wordCount(main)} words`);
+  assert.match(main, /Join the private beta/);
+  assert.match(main, /name="name"/);
+  assert.match(main, /name="email"/);
 });

@@ -11,6 +11,7 @@ const pagePaths = [
   'support/index.html',
   'privacy/index.html',
   'terms/index.html',
+  'beta/index.html',
 ];
 
 function read(relativePath) {
@@ -104,13 +105,14 @@ test('local links and assets referenced by company pages resolve', () => {
   }
 });
 
-test('legal, support, Tesla, and Shared ETA routes remain present', () => {
+test('legal, support, beta, Tesla, and Shared ETA routes remain present', () => {
   const required = [
     'pulse/index.html',
     'support/index.html',
     'privacy/index.html',
     'terms/index.html',
     'eta/index.html',
+    'beta/index.html',
     '.well-known/appspecific/com.tesla.3p.public-key.pem',
     'CNAME',
   ];
