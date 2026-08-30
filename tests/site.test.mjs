@@ -77,7 +77,7 @@ test('Pulse showcase uses every approved real capture at native proportions', ()
   for (const filename of [
     '01-car.png', '02-drives.png', '03-charging.png', '04-charging-lockscreen.jpg',
     '05-share-eta.png', '06-share-eta-message.png', '07-recipient-eta.png',
-    '08-driving-lockscreen.jpg', '09-destination.png',
+    '08-driving-lockscreen.jpg', '09-destination.png', '10-drive-history.png',
   ]) {
     assert.ok(existsSync(join(root, 'assets/screens/showcase', filename)), filename);
     assert.match(html, new RegExp(filename.replace('.', '\\.')));

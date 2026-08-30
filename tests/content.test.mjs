@@ -28,7 +28,7 @@ test('root page is the complete Pulse landing page', () => {
   assert.ok(wordCount(main) <= 260, `homepage has ${wordCount(main)} words`);
   assert.match(main, /Every drive\. Every charge\. Anytime\./);
   assert.match(main, /data-screen-carousel/);
-  assert.equal((main.match(/class="carousel-screen/g) ?? []).length, 9);
+  assert.equal((main.match(/class="carousel-screen/g) ?? []).length, 10);
   assert.doesNotMatch(main, /Products|optional hardware|Free US beta/i);
 });
 

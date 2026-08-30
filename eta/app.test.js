@@ -28,7 +28,7 @@ test('keeps the recipient page focused and exposes a no-install link preview', (
   assert.match(pageSource, /name="twitter:card" content="summary_large_image"/);
   assert.match(pageSource, /rel="canonical" href="https:\/\/ludicpulse\.com\/eta\/"/);
   assert.doesNotMatch(pageSource, /#[A-Za-z0-9_-]{40,80}/);
-  assert.match(pageSource, /class="brand"><span>Ludic Pulse<\/span>/);
+  assert.doesNotMatch(pageSource, /class="brand"|<span>Ludic Pulse<\/span>/);
 });
 
 function element() {
