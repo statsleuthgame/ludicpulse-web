@@ -59,7 +59,8 @@ test('Inside the app fills the hero with four single-row product areas', () => {
   for (const area of ['Car', 'Drives', 'Charging', 'Shared ETA']) assert.match(inside, new RegExp(`<dt>${area}<\\/dt>`));
   assert.match(inside, /longer-term patterns/);
   assert.match(inside, /Live Activity progress on the Lock Screen/);
-  assert.match(inside, /no app or sign-in required/);
+  assert.match(inside, /opens in any browser\. No app or sign-in required\./);
+  assert.doesNotMatch(inside, /—/);
   assert.doesNotMatch(main, /The full picture, without the noise|hero-actions/);
 });
 

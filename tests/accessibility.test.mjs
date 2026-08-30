@@ -89,6 +89,11 @@ test('Pulse hero starts near the divided site header', () => {
   assert.match(css, /\.pulse-hero > \.reveal:first-child \{[^}]*padding-top: 12px;/);
 });
 
+test('Pulse privacy close uses compact balanced spacing', () => {
+  assert.match(css, /\.hub-status \{ padding-block: 64px; border-top: 1px solid var\(--line\); \}/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.hub-status \{ padding-block: 52px; \}/);
+});
+
 test('mobile privacy tables retain their column labels', () => {
   const privacy = read('privacy/index.html');
   for (const label of ['Category', 'Examples', 'Purpose', 'Data', 'Retention']) {
