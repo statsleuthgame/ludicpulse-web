@@ -96,6 +96,12 @@ test('Pulse privacy close uses compact balanced spacing', () => {
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.hub-status \{ padding-block: 36px; \}[\s\S]*?\.hub-status h2 \{ white-space: normal; \}/);
 });
 
+test('beta promise starts close to the page header', () => {
+  assert.match(css, /\.beta-hero \{[\s\S]*?padding-block: 56px 96px;/);
+  assert.match(css, /\.beta-copy \{ grid-area: copy; align-self: start; \}/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.beta-hero \{ min-height: 0; padding-block: 40px 68px; \}/);
+});
+
 test('mobile privacy tables retain their column labels', () => {
   const privacy = read('privacy/index.html');
   for (const label of ['Category', 'Examples', 'Purpose', 'Data', 'Retention']) {

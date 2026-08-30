@@ -27,6 +27,15 @@ test('beta page collects exactly name and email from people', () => {
   assert.deepEqual(visibleInputs.map((input) => input.match(/name="([^"]+)"/)?.[1]), ['name', 'email']);
 });
 
+test('beta page leads directly with the product promise and local-data trust copy', () => {
+  const html = read('beta/index.html');
+  const hero = html.match(/<section class="beta-hero[\s\S]*?<\/section>/)?.[0] ?? '';
+  assert.doesNotMatch(hero, /Ludic Pulse · Private beta/);
+  assert.match(hero, /<div class="beta-copy reveal">\s*<h1 id="beta-title">See every drive more clearly\.<\/h1>/);
+  assert.match(hero, /<strong>Built around your car<\/strong>/);
+  assert.match(hero, /<strong>Your data stays yours<\/strong><span>Personal data stays local to protect your privacy\.<\/span>/);
+});
+
 test('beta form uses the owned endpoint and explains the narrow data use', () => {
   const html = read('beta/index.html');
   assert.match(html, /action="https:\/\/telem\.statmask\.com:8443\/api\/public\/beta-signup"/);

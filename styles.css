@@ -432,10 +432,10 @@ h3 { font-size: 24px; line-height: 1.2; }
   align-items: start;
   column-gap: clamp(64px, 8vw, 120px);
   row-gap: 40px;
-  padding-block: 88px 112px;
+  padding-block: 56px 96px;
 }
 
-.beta-copy { grid-area: copy; align-self: end; }
+.beta-copy { grid-area: copy; align-self: start; }
 .beta-copy h1 { max-width: 720px; }
 .beta-copy .hero-lede { max-width: 660px; }
 
@@ -657,7 +657,7 @@ h3 { font-size: 24px; line-height: 1.2; }
   .hero-inside { margin-top: 38px; }
   .hero-feature-list .feature-row { padding: 14px 0; }
   .content-main .grid { grid-template-columns: 1fr; }
-  .beta-hero { min-height: 0; padding-block: 62px 84px; }
+  .beta-hero { min-height: 0; padding-block: 40px 68px; }
   .beta-trust li { grid-template-columns: 1fr; gap: 4px; }
   .content-main table,
   .content-main thead,
