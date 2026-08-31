@@ -3,6 +3,13 @@
 Static company marketing, Ludic Hub, support, privacy, Terms, Tesla public-key,
 OAuth callback, and Shared ETA pages for `ludicpulse.com`.
 
+Production is delivered by the Vercel project `ludicpulse-web`. GitHub `main`
+is connected for automatic deployments; `vercel.json` supplies HSTS, response
+CSP, framing protection, Permissions-Policy, referrer policy, MIME protection,
+and explicit cache behavior. The GitHub Pages workflow remains a source-level
+fallback, but public DNS points only to Vercel. Do not remove or weaken the
+response headers without rerunning the bounded production security audit.
+
 The company homepage, `/pulse/`, `/hub/`, and `/beta/` are maintained directly in this repository.
 The approved wordmark and Pulse screenshots live in `assets/`; do not redraw the
 wordmark or replace it with generated lettering.
