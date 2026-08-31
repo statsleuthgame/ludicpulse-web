@@ -28,6 +28,23 @@ function localTarget(pagePath, value) {
   return clean.endsWith('/') ? join(target, 'index.html') : target;
 }
 
+test('header-capable production policy protects every public response', () => {
+  const config = JSON.parse(read('vercel.json'));
+  const headers = Object.fromEntries(config.headers[0].headers.map((header) => [
+    header.key, header.value,
+  ]));
+  assert.match(headers['Strict-Transport-Security'], /max-age=31536000/);
+  assert.match(headers['Content-Security-Policy'], /frame-ancestors 'none'/);
+  assert.match(headers['Content-Security-Policy'], /worker-src 'self' blob:/);
+  assert.doesNotMatch(headers['Content-Security-Policy'], /script-src[^;]*'unsafe-inline'/);
+  assert.equal(headers['X-Frame-Options'], 'DENY');
+  assert.equal(headers['X-Content-Type-Options'], 'nosniff');
+  assert.equal(headers['Referrer-Policy'], 'no-referrer');
+  for (const page of ['index.html', 'pulse/index.html', 'hub/index.html', 'beta/index.html']) {
+    assert.doesNotMatch(read(page), /<script>document\.documentElement/u);
+  }
+});
+
 test('homepage leads directly with Ludic Pulse', () => {
   const html = read('index.html');
   const main = html.match(/<main\b[\s\S]*?<\/main>/)?.[0] ?? '';

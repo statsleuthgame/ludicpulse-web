@@ -1,0 +1,6 @@
+.git
+.github
+tests
+**/*.test.js
+README.md
+CNAME
