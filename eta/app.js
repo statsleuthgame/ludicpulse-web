@@ -1,13 +1,21 @@
 (() => {
   'use strict';
-  const API = 'https://telem.statmask.com:8443/api/public/eta/state';
-  const POLL_MS = 10_000;
-  const token = location.hash.slice(1);
+  const sessionParameter = '_eta_session';
+  const reloadedSession = !location.hash
+    && new URLSearchParams(location.search).has(sessionParameter);
+  let token = location.hash.slice(1);
+  const validToken = /^[A-Za-z0-9_-]{40,80}$/.test(token);
+  if (location.hash) {
+    const search = new URLSearchParams(location.search);
+    search.set(sessionParameter, crypto.randomUUID());
+    history.replaceState(null, '', `${location.pathname}?${search}`);
+  }
   const el = (id) => document.getElementById(id);
   let latest = null;
-  let pollTimer = null;
   let tickTimer = null;
-  let controller = null;
+  let stateWorker = null;
+  let stateWorkerReady = false;
+  let workerRetryTimer = null;
   let map = null;
   let mapScriptLoading = false;
   let mapKitInitialized = false;
@@ -19,7 +27,6 @@
   let estimateFailures = 0;
   let estimateRetryTimer = null;
 
-  const validToken = /^[A-Za-z0-9_-]{40,80}$/.test(token);
   const {
     validPoint, validPoints, presentation, requestAppleRoute, selectAppleRoute,
     shouldRefreshEstimate,
@@ -31,9 +38,11 @@
   const miles = (value) => `${value < 10 ? value.toFixed(1) : Math.round(value)} mi left`;
   function terminal(state) {
     el('loading').hidden = true; el('trip').hidden = true; el('terminal').hidden = false;
-    el('terminal-title').textContent = state === 'expired' ? 'Link expired' : 'Sharing ended';
-    el('terminal-body').textContent = state === 'expired'
-      ? 'This four-hour private link has expired.' : 'The driver arrived, stopped sharing, or changed destinations.';
+    el('terminal-title').textContent = state === 'expired' ? 'Link expired'
+      : state === 'reopen' ? 'Open the shared link again' : 'Sharing ended';
+    el('terminal-body').textContent = state === 'expired' ? 'This four-hour private link has expired.'
+      : state === 'reopen' ? 'For privacy, reloading clears this trip. Reopen the original link to continue.'
+        : 'The driver arrived, stopped sharing, or changed destinations.';
     stopPolling();
   }
 
@@ -214,39 +223,78 @@
     el('countdown').textContent = minutes == null ? '—' : `${minutes} min`;
   }
 
-  async function poll() {
-    if (!validToken || document.hidden) return;
-    controller?.abort(); controller = new AbortController();
-    try {
-      const response = await fetch(API, {
-        method: 'POST', cache: 'no-store', referrerPolicy: 'no-referrer',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, routeVersion: latest?.routeVersion }), signal: controller.signal,
-      });
-      const responseData = await response.json();
-      const data = responseData.state === 'active' || responseData.state === 'delayed'
-        ? { ...latest, ...responseData, routePoints: responseData.routePoints ?? latest?.routePoints }
-        : responseData;
-      if (data.state === 'ended' || data.state === 'expired') terminal(data.state);
-      else if (data.state === 'active' || data.state === 'delayed') render(data);
-      else terminal('ended');
-    } catch (error) {
-      if (error.name !== 'AbortError' && latest) {
-        latest.state = 'delayed'; render(latest);
-      } else if (error.name !== 'AbortError') {
-        el('loading').querySelector('p').textContent = 'The latest update is delayed. Retrying…';
-      }
+  function showPollingError() {
+    if (latest) {
+      latest.state = 'delayed'; render(latest);
+    } else {
+      el('loading').querySelector('p').textContent = 'The latest update is delayed. Retrying…';
     }
   }
 
+  function handleStateMessage(event) {
+    const message = event.data;
+    if (!message || typeof message !== 'object') return;
+    if (message.type === 'error') { showPollingError(); return; }
+    if (message.type === 'invalid') { terminal('ended'); return; }
+    if (message.type === 'ready') {
+      stateWorkerReady = true;
+      token = null;
+      if (!document.hidden) startPolling();
+      return;
+    }
+    if (message.type !== 'state') return;
+    const responseData = message.data;
+    if (!responseData || typeof responseData !== 'object') { showPollingError(); return; }
+    const data = responseData.state === 'active' || responseData.state === 'delayed'
+      ? { ...latest, ...responseData, routePoints: responseData.routePoints ?? latest?.routePoints }
+      : responseData;
+    if (data.state === 'ended' || data.state === 'expired') terminal(data.state);
+    else if (data.state === 'active' || data.state === 'delayed') render(data);
+    else terminal('ended');
+  }
+
   function startPolling() {
-    stopPolling(); void poll(); pollTimer = setInterval(poll, POLL_MS); tickTimer = setInterval(tick, 1_000);
+    if (!stateWorkerReady) return;
+    stateWorker?.postMessage({ type: 'start' });
+    tickTimer ??= setInterval(tick, 1_000);
   }
   function stopPolling() {
-    if (pollTimer) clearInterval(pollTimer); if (tickTimer) clearInterval(tickTimer);
-    pollTimer = null; tickTimer = null; controller?.abort(); controller = null;
+    if (tickTimer) clearInterval(tickTimer);
+    tickTimer = null; stateWorker?.postMessage({ type: 'stop' });
     cancelEstimateWork(); estimateBasis = null;
   }
+
+  function retryWorker() {
+    stateWorker?.terminate();
+    stateWorker = null; stateWorkerReady = false;
+    if (!token || workerRetryTimer) return;
+    showPollingError();
+    workerRetryTimer = setTimeout(() => {
+      workerRetryTimer = null;
+      initializePolling();
+    }, 5_000);
+  }
+
+  function handleWorkerError() {
+    if (token) retryWorker();
+    else showPollingError();
+  }
+
+  function initializePolling() {
+    try {
+      stateWorker = new Worker('/eta/state-worker.js?v=20260830-token-isolation', {
+        name: 'ludic-eta-state',
+      });
+    } catch {
+      retryWorker();
+      return;
+    }
+    stateWorker.addEventListener('message', handleStateMessage);
+    stateWorker.addEventListener('error', handleWorkerError);
+    stateWorker.postMessage({ type: 'initialize', token });
+  }
+
   document.addEventListener('visibilitychange', () => document.hidden ? stopPolling() : startPolling());
-  if (!validToken) terminal('ended'); else startPolling();
+  if (!validToken) { token = null; terminal(reloadedSession ? 'reopen' : 'ended'); }
+  else initializePolling();
 })();

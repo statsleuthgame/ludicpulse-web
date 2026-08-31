@@ -18,7 +18,7 @@
   <meta name="twitter:description" content="Tap to follow the private live trip. No app or sign-in required.">
   <meta name="twitter:image" content="https://ludicpulse.com/social-card.png">
   <link rel="canonical" href="https://ludicpulse.com/eta/">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.apple-mapkit.com; worker-src blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.apple-mapkit.com https://*.mzstatic.com; connect-src https://telem.statmask.com:8443 https://*.apple-mapkit.com https://*.ls.apple.com; font-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.apple-mapkit.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.apple-mapkit.com https://*.mzstatic.com; connect-src https://telem.statmask.com:8443 https://*.apple-mapkit.com https://*.ls.apple.com; font-src 'self'; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/eta/styles.css?v=20260829-no-brand">
   <title>Shared ETA · Ludic Pulse</title>
@@ -66,6 +66,6 @@
     <footer>Ludic Pulse is independent and is not affiliated with, endorsed by, or sponsored by Tesla, Inc. Route and ETA data comes from the sharing driver’s Tesla.</footer>
   </main>
   <script src="/eta/map-model.js?v=20260819-clean" defer></script>
-  <script src="/eta/app.js?v=20260819-clean" defer></script>
+  <script src="/eta/app.js?v=20260830-token-isolation" defer></script>
 </body>
 </html>

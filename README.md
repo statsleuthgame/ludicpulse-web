@@ -27,8 +27,8 @@ reference or display them.
 Shared ETA website gates:
 
 ```bash
-node --test tests/site.test.mjs tests/content.test.mjs tests/accessibility.test.mjs eta/app.test.js eta/map-model.test.js
-node --check site.js
+node --test tests/site.test.mjs tests/content.test.mjs tests/accessibility.test.mjs eta/app.test.js eta/map-model.test.js eta/state-worker.test.js
+node --check site.js && node --check eta/app.js && node --check eta/map-model.js && node --check eta/state-worker.js
 MAPKIT_TEST_TOKEN=... node eta/verify-mapkit-browser.mjs
 ```
 

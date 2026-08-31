@@ -16,6 +16,9 @@ const settle = () => new Promise((resolve) => setImmediate(() => setImmediate(re
 test('pins the MapKit runtime whose callback contract the page implements', () => {
   assert.match(source, /\/mk\/5\.81\.65\/mapkit\.js/);
   assert.doesNotMatch(source, /\/mk\/5\.x\.x\/mapkit\.js/);
+  assert.match(source, /new Worker\('\/eta\/state-worker\.js\?v=20260830-token-isolation'/);
+  assert.doesNotMatch(source, /\bfetch\s*\(/);
+  assert.match(source, /message\.type === 'ready'[\s\S]*token = null;/);
 });
 
 test('keeps the recipient page focused and exposes a no-install link preview', () => {
@@ -27,6 +30,7 @@ test('keeps the recipient page focused and exposes a no-install link preview', (
   assert.match(pageSource, /property="og:image" content="https:\/\/ludicpulse\.com\/social-card\.png"/);
   assert.match(pageSource, /name="twitter:card" content="summary_large_image"/);
   assert.match(pageSource, /rel="canonical" href="https:\/\/ludicpulse\.com\/eta\/"/);
+  assert.match(pageSource, /worker-src 'self' blob:/);
   assert.doesNotMatch(pageSource, /#[A-Za-z0-9_-]{40,80}/);
   assert.doesNotMatch(pageSource, /class="brand"|<span>Ludic Pulse<\/span>/);
 });
@@ -47,15 +51,22 @@ function element() {
   };
 }
 
-async function runPage(data, directionResults) {
+async function runPage(data, directionResults, options = {}) {
   const elements = new Map();
   const maps = [];
   const timers = [];
   const warnings = [];
   const pendingDirections = [];
+  const workerMessages = [];
+  const historyCalls = [];
+  const eventOrder = [];
   const results = Array.isArray(directionResults) ? [...directionResults] : [directionResults];
   let directionCalls = 0;
   let visibilityHandler;
+  let stateWorker;
+  let thirdPartyObservedHash;
+  let parentFetchCalls = 0;
+  let workerAttempts = 0;
   class FakeMap {
     static ColorSchemes = { Dark: 'dark' };
     constructor() { this.items = []; maps.push(this); }
@@ -102,9 +113,50 @@ async function runPage(data, directionResults) {
     Padding: class Padding {},
     Directions,
   };
+  const location = {
+    hash: options.hash ?? `#${'A'.repeat(43)}`,
+    pathname: '/eta/',
+    search: options.search ?? '?source=message',
+  };
+  const history = {
+    replaceState(state, title, url) {
+      eventOrder.push('history');
+      historyCalls.push({ state, title, url });
+      location.hash = '';
+    },
+  };
+  const window = { EtaMapModel: model };
+  class FakeWorker {
+    constructor(url, workerOptions) {
+      eventOrder.push('worker');
+      workerAttempts += 1;
+      if (workerAttempts <= (options.workerFailures ?? 0)) throw new Error('Worker unavailable');
+      assert.equal(url, '/eta/state-worker.js?v=20260830-token-isolation');
+      assert.equal(workerOptions.name, 'ludic-eta-state');
+      this.listeners = new Map();
+      stateWorker = this;
+    }
+    addEventListener(name, callback) { this.listeners.set(name, callback); }
+    postMessage(message) {
+      workerMessages.push(structuredClone(message));
+      if (message.type === 'initialize') {
+        queueMicrotask(() => this.listeners.get('message')?.({ data: { type: 'ready' } }));
+      } else if (message.type === 'start') {
+        queueMicrotask(() => this.listeners.get('message')?.({ data: { type: 'state', data } }));
+      }
+    }
+    terminate() { this.terminated = true; }
+  }
   const document = {
     hidden: false,
-    head: { append() {} },
+    head: {
+      append(script) {
+        eventOrder.push('mapkit');
+        thirdPartyObservedHash = location.hash;
+        window.mapkit = mapkit;
+        script.onload();
+      },
+    },
     getElementById(id) {
       if (!elements.has(id)) elements.set(id, element());
       return elements.get(id);
@@ -113,12 +165,15 @@ async function runPage(data, directionResults) {
     createElement() { return element(); },
   };
   const context = vm.createContext({
-    AbortController,
     Date,
     console: { warn(message) { warnings.push(message); } },
+    crypto: { randomUUID: () => 'session-id' },
     document,
-    fetch: async () => ({ json: async () => data }),
-    location: { hash: `#${'A'.repeat(43)}` },
+    fetch: async () => { parentFetchCalls += 1; throw new Error('parent fetch must remain unused'); },
+    history,
+    location,
+    structuredClone,
+    URLSearchParams,
     setInterval: () => 1,
     clearInterval() {},
     setTimeout(callback, delay) {
@@ -127,7 +182,8 @@ async function runPage(data, directionResults) {
       return timer;
     },
     clearTimeout(timer) { if (timer) timer.active = false; },
-    window: { EtaMapModel: model, mapkit },
+    window,
+    Worker: FakeWorker,
   });
   vm.runInContext(source, context);
   await settle();
@@ -139,6 +195,14 @@ async function runPage(data, directionResults) {
     pendingDirections,
     timers,
     warnings,
+    eventOrder,
+    historyCalls,
+    location,
+    get parentFetchCalls() { return parentFetchCalls; },
+    get stateWorker() { return stateWorker; },
+    get thirdPartyObservedHash() { return thirdPartyObservedHash; },
+    get workerAttempts() { return workerAttempts; },
+    workerMessages,
     async runNextTimer() {
       const timer = timers.find((candidate) => candidate.active);
       assert.ok(timer, 'expected an active retry timer');
@@ -166,6 +230,62 @@ const active = (extra = {}) => ({
   position,
   destination,
   ...extra,
+});
+
+test('scrubs the bearer before Worker creation and third-party MapKit execution', async () => {
+  const result = await runPage(active({ routePoints: [position, destination] }), { routes: [] });
+  assert.deepEqual(result.historyCalls, [{
+    state: null, title: '', url: '/eta/?source=message&_eta_session=session-id',
+  }]);
+  assert.equal(result.location.hash, '');
+  assert.equal(result.thirdPartyObservedHash, '');
+  assert.ok(result.eventOrder.indexOf('history') < result.eventOrder.indexOf('worker'));
+  assert.ok(result.eventOrder.indexOf('worker') < result.eventOrder.indexOf('mapkit'));
+  assert.deepEqual(result.workerMessages.slice(0, 2), [
+    { type: 'initialize', token: 'A'.repeat(43) },
+    { type: 'start' },
+  ]);
+  assert.equal(result.parentFetchCalls, 0);
+
+  await result.setHidden(true);
+  await result.setHidden(false);
+  assert.deepEqual(result.workerMessages.slice(2), [{ type: 'stop' }, { type: 'start' }]);
+  assert.equal(result.workerMessages.filter((message) => 'token' in message).length, 1);
+});
+
+test('scrubs an invalid fragment without creating a bearer Worker', async () => {
+  const result = await runPage(active(), { routes: [] }, { hash: '#not-a-valid-token' });
+  assert.equal(result.location.hash, '');
+  assert.equal(result.stateWorker, undefined);
+  assert.deepEqual(result.workerMessages, []);
+  assert.equal(result.elements.get('terminal').hidden, false);
+});
+
+test('explains that a scrubbed trip must be reopened after reload', async () => {
+  const result = await runPage(active(), { routes: [] }, {
+    hash: '', search: '?source=message&_eta_session=previous',
+  });
+  assert.equal(result.elements.get('terminal-title').textContent, 'Open the shared link again');
+  assert.match(result.elements.get('terminal-body').textContent, /reloading clears this trip/i);
+});
+
+test('retries a synchronous Worker startup failure before loading MapKit', async () => {
+  const result = await runPage(active({ routePoints: [position, destination] }), { routes: [] }, {
+    workerFailures: 1,
+  });
+  assert.equal(result.workerAttempts, 1);
+  assert.equal(result.thirdPartyObservedHash, undefined);
+  assert.match(result.elements.get('loading').querySelector('p').textContent, /Retrying/);
+
+  await result.runNextTimer();
+  assert.equal(result.workerAttempts, 2);
+  assert.equal(result.thirdPartyObservedHash, '');
+});
+
+test('treats malformed Worker state as a retryable polling error', async () => {
+  const result = await runPage(null, { routes: [] });
+  assert.match(result.elements.get('loading').querySelector('p').textContent, /Retrying/);
+  assert.equal(result.thirdPartyObservedHash, undefined);
 });
 
 test('draws a labeled Apple estimate chosen with Tesla remaining distance', async () => {
