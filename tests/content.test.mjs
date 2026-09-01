@@ -96,7 +96,8 @@ test('legal pages keep their substantive disclosures without duplicated page CSS
     const html = read(pagePath);
     assert.doesNotMatch(html, /<style>/, pagePath);
     assert.match(html, /Ludic Technologies LLC/, pagePath);
-    assert.match(html, /support@ludicpulse\.com/, pagePath);
+    assert.match(html, /ludictechnologiesllc@gmail\.com/, pagePath);
+    assert.doesNotMatch(html, /support@ludicpulse\.com/, pagePath);
   }
 });
 
