@@ -12,6 +12,7 @@ const pagePaths = [
   'privacy/index.html',
   'terms/index.html',
   'beta/index.html',
+  'beta/thanks/index.html',
 ];
 
 function read(relativePath) {
@@ -39,7 +40,12 @@ test('header-capable production policy protects every public response', () => {
   assert.doesNotMatch(headers['Content-Security-Policy'], /script-src[^;]*'unsafe-inline'/);
   assert.equal(headers['X-Frame-Options'], 'DENY');
   assert.equal(headers['X-Content-Type-Options'], 'nosniff');
-  assert.equal(headers['Referrer-Policy'], 'no-referrer');
+  assert.equal(headers['Referrer-Policy'], 'strict-origin-when-cross-origin');
+  for (const sensitiveSource of ['/eta/(.*)', '/auth/tesla/callback/(.*)']) {
+    const policy = config.headers.find((entry) => entry.source === sensitiveSource);
+    assert.ok(policy, sensitiveSource);
+    assert.deepEqual(policy.headers, [{ key: 'Referrer-Policy', value: 'no-referrer' }]);
+  }
   for (const page of ['index.html', 'pulse/index.html', 'hub/index.html', 'beta/index.html']) {
     assert.doesNotMatch(read(page), /<script>document\.documentElement/u);
   }
@@ -143,10 +149,36 @@ test('legal, support, beta, Tesla, and Shared ETA routes remain present', () => 
     'terms/index.html',
     'eta/index.html',
     'beta/index.html',
+    'beta/thanks/index.html',
+    'analytics.js',
     '.well-known/appspecific/com.tesla.3p.public-key.pem',
     'CNAME',
   ];
   for (const relativePath of required) {
     assert.ok(existsSync(join(root, relativePath)), relativePath);
   }
+});
+
+test('anonymous analytics covers marketing pages but never sensitive public flows', () => {
+  for (const pagePath of pagePaths) {
+    assert.match(read(pagePath), /src="\/analytics\.js\?v=20260901-pageview-v1"/, pagePath);
+  }
+  for (const pagePath of ['eta/index.html', 'auth/tesla/callback/index.html']) {
+    assert.doesNotMatch(read(pagePath), /analytics\.js|vercel\/insights/i, pagePath);
+  }
+  const script = read('analytics.js');
+  assert.match(script, /\/_vercel\/insights\/script\.js/);
+  assert.match(script, /'localhost', '127\.0\.0\.1', '::1'/);
+  assert.doesNotMatch(script, /email|formData|localStorage|sessionStorage|cookie/i);
+});
+
+test('launch and conversion paths are measurable without custom events', () => {
+  const config = JSON.parse(read('vercel.json'));
+  assert.deepEqual(config.redirects, [{
+    source: '/teaser', destination: '/teaser/', permanent: false,
+  }]);
+  assert.deepEqual(config.rewrites, [{
+    source: '/teaser/', destination: '/index.html',
+  }]);
+  assert.match(read('site.js'), /window\.location\.assign\('\/beta\/thanks\/'\)/);
 });

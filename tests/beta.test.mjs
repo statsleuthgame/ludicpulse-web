@@ -48,6 +48,9 @@ test('beta form uses the owned endpoint and explains the narrow data use', () =>
 test('privacy policy discloses the beta notification email processor', () => {
   const privacy = read('privacy/index.html');
   assert.match(privacy, /<strong>Resend<\/strong>/);
+  assert.match(privacy, /<strong>Vercel<\/strong>/);
+  assert.match(privacy, /cookie-free aggregate Web Analytics/);
+  assert.match(privacy, /Analytics is not loaded on Shared ETA recipient views/);
   assert.match(privacy, /name, email address, and submission time/);
 });
 
@@ -60,5 +63,14 @@ test('beta behavior sends only the two requested fields and handles every state'
   assert.match(script, /response\.ok/);
   assert.match(script, /beta-form--success/);
   assert.match(script, /beta-form--error/);
+  assert.match(script, /window\.location\.assign\('\/beta\/thanks\/'\)/);
   assert.doesNotMatch(script, /phone|vin|vehicle|company|newsletter|analytics/i);
+});
+
+test('successful signup has a dedicated anonymous conversion page', () => {
+  const html = read('beta/thanks/index.html');
+  assert.match(html, /<meta name="robots" content="noindex">/);
+  assert.match(html, /<h1 id="thanks-title">You're on the list\.<\/h1>/);
+  assert.match(html, /We received your request/);
+  assert.match(html, /src="\/analytics\.js\?v=20260901-pageview-v1"/);
 });

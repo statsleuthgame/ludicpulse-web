@@ -6,7 +6,7 @@ import test from 'node:test';
 const root = resolve(import.meta.dirname, '..');
 const css = readFileSync(resolve(root, 'styles.css'), 'utf8');
 const script = readFileSync(resolve(root, 'site.js'), 'utf8');
-const pagePaths = ['index.html', 'pulse/index.html', 'hub/index.html', 'support/index.html', 'privacy/index.html', 'terms/index.html', 'beta/index.html'];
+const pagePaths = ['index.html', 'pulse/index.html', 'hub/index.html', 'support/index.html', 'privacy/index.html', 'terms/index.html', 'beta/index.html', 'beta/thanks/index.html'];
 
 function read(relativePath) {
   return readFileSync(resolve(root, relativePath), 'utf8');

@@ -228,8 +228,7 @@ if (betaForm) {
         return;
       }
       betaForm.reset();
-      setBetaState('success');
-      history.replaceState(null, '', window.location.pathname);
+      window.location.assign('/beta/thanks/');
     } catch {
       setBetaState('error', 'We could not connect right now. Please try again in a moment.');
     }

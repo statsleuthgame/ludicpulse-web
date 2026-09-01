@@ -1,6 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "redirects": [
+    {
+      "source": "/teaser",
+      "destination": "/teaser/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/teaser/",
+      "destination": "/index.html"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -15,7 +28,7 @@
         },
         {
           "key": "Referrer-Policy",
-          "value": "no-referrer"
+          "value": "strict-origin-when-cross-origin"
         },
         {
           "key": "X-Content-Type-Options",
@@ -36,6 +49,24 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/eta/(.*)",
+      "headers": [
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
+    },
+    {
+      "source": "/auth/tesla/callback/(.*)",
+      "headers": [
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
         }
       ]
     }

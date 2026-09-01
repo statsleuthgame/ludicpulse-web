@@ -25,11 +25,21 @@ node node_modules/.pnpm/tsx@4.23.1/node_modules/tsx/dist/cli.mjs \
 ```
 
 After regeneration, preserve `CNAME`, `.nojekyll`, `.well-known/`, `auth/`,
-`pulse/`, `hub/`, `beta/`, `assets/`, `styles.css`, `site.js`, `social-card.png`, `icon.png`,
+`pulse/`, `hub/`, `beta/`, `assets/`, `styles.css`, `site.js`, `analytics.js`, `social-card.png`, `icon.png`,
 `favicon.png`, and this README. Review regenerated root, support, privacy, and
 Terms pages before committing so the shared company navigation remains intact.
 The Pulse app-icon files remain release assets only; public HTML must not
 reference or display them.
+
+## Launch analytics
+
+Vercel Web Analytics is intentionally limited to anonymous page views on the
+marketing, support, legal, and private-beta pages. The Shared ETA recipient and
+Tesla callback pages do not load analytics. Use `https://ludicpulse.com/teaser/`
+for launch-post traffic, `/beta/` for signup intent, and `/beta/thanks/` for
+completed requests. The Vercel Hobby plan reports pages, referrers, countries,
+devices, browsers, and operating systems; custom events and UTM panels require a
+paid analytics plan.
 
 Shared ETA website gates:
 
