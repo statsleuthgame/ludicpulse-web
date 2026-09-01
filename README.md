@@ -39,7 +39,8 @@ Tesla callback pages do not load analytics. Use `https://ludicpulse.com/teaser/`
 for launch-post traffic, `/beta/` for signup intent, and `/beta/thanks/` for
 completed requests. The Vercel Hobby plan reports pages, referrers, countries,
 devices, browsers, and operating systems; custom events and UTM panels require a
-paid analytics plan.
+paid analytics plan. Web Analytics was enabled for the production project on
+September 1, 2026.
 
 Shared ETA website gates:
 
