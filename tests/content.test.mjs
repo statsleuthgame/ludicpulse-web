@@ -13,9 +13,14 @@ function mainMarkup(html) {
   return html.match(/<main\b[\s\S]*?<\/main>/)?.[0] ?? '';
 }
 
-test('privacy describes the selected-charge place lookup and its provenance boundaries', () => {
+test('privacy describes visible charging places, shared memory reuse and provenance boundaries', () => {
   const privacy = read('privacy/index.html');
-  assert.match(privacy, /Selected charging locations/);
+  assert.match(privacy, /Charging locations/);
+  assert.match(privacy, /visible session/);
+  assert.match(privacy, /limits and queues these requests/);
+  assert.match(privacy, /reuses completed results across recent sessions, history, and detail/);
+  assert.match(privacy, /account or vehicle context changes or you sign out/);
+  assert.doesNotMatch(privacy, /when the charge view closes/);
   assert.match(privacy, /saved coordinates or full street address/);
   assert.match(privacy, /does not request your phone’s current GPS location/);
   assert.match(privacy, /short-lived in-memory cache/);
