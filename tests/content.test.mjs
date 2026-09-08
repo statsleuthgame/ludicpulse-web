@@ -13,6 +13,16 @@ function mainMarkup(html) {
   return html.match(/<main\b[\s\S]*?<\/main>/)?.[0] ?? '';
 }
 
+test('privacy describes the selected-charge place lookup and its provenance boundaries', () => {
+  const privacy = read('privacy/index.html');
+  assert.match(privacy, /Selected charging locations/);
+  assert.match(privacy, /saved coordinates or full street address/);
+  assert.match(privacy, /does not request your phone’s current GPS location/);
+  assert.match(privacy, /short-lived in-memory cache/);
+  assert.match(privacy, /does not write those results into charging history/);
+  assert.match(privacy, /Effective September 8, 2026/);
+});
+
 function wordCount(html) {
   return html
     .replace(/<[^>]+>/g, ' ')
