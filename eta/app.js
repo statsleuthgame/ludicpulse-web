@@ -48,7 +48,7 @@
 
   function svgRoute(points, progress, position) {
     const svg = el('route-fallback');
-    if (!validPoints(points)) { svg.hidden = true; return; }
+    if (!validPoints(points)) { svg.setAttribute('hidden', ''); return; }
     const latitudes = points.map((point) => point.latitude);
     const longitudes = points.map((point) => point.longitude);
     const minLat = Math.min(...latitudes), maxLat = Math.max(...latitudes);
@@ -66,7 +66,11 @@
     }).join(' ');
     el('route-background').setAttribute('d', path);
     el('route-line').setAttribute('d', path);
+    const start = project(points[0]);
     const destination = project(points.at(-1));
+    const sharedEndpoint = start.x === destination.x && start.y === destination.y;
+    el('start-marker').setAttribute('cx', start.x + (sharedEndpoint ? -10 : 0));
+    el('start-marker').setAttribute('cy', start.y);
     const nearestIndex = validPoint(position) ? points.reduce((best, point, index) => {
       const lat = point.latitude - position.latitude;
       const lon = point.longitude - position.longitude;
@@ -78,16 +82,20 @@
     );
     const current = project(points[routeIndex]);
     el('car-marker').setAttribute('cx', current.x); el('car-marker').setAttribute('cy', current.y);
-    el('destination-marker').setAttribute('cx', destination.x); el('destination-marker').setAttribute('cy', destination.y);
-    svg.hidden = false;
+    el('car-marker').setAttribute('visibility', routeIndex === 0 || routeIndex === points.length - 1 ? 'hidden' : 'visible');
+    el('destination-marker').setAttribute('cx', destination.x + (sharedEndpoint ? 10 : 0));
+    el('destination-marker').setAttribute('cy', destination.y);
+    svg.removeAttribute('hidden');
   }
 
   function showMapFallback(data) {
     const hasRoute = validPoints(data?.routePoints);
     el('map').hidden = true;
-    el('route-fallback').hidden = !hasRoute;
+    if (hasRoute) el('route-fallback').removeAttribute('hidden');
+    else el('route-fallback').setAttribute('hidden', '');
     el('map-unavailable').hidden = hasRoute;
     el('route-source').hidden = true;
+    el('route-legend').hidden = !hasRoute;
   }
 
   function routeLabel(value) {
@@ -131,8 +139,22 @@
       });
       if (mapItems.length) map.removeItems(mapItems);
       const coordinate = (point) => new window.mapkit.Coordinate(point.latitude, point.longitude);
-      const car = new window.mapkit.MarkerAnnotation(coordinate(data.position), { color: '#378ADD', glyphText: '●', title: 'Current location' });
-      mapItems = [car];
+      const start = model.hasRoute ? data.routePoints[0] : data.position;
+      const end = model.hasRoute ? data.routePoints.at(-1) : data.destination;
+      const samePoint = (a, b) => validPoint(a) && validPoint(b)
+        && a.latitude === b.latitude && a.longitude === b.longitude;
+      const sharedEndpoint = samePoint(start, end);
+      const endpoint = (point, kind, title) => new window.mapkit.Annotation(coordinate(point), () => {
+        const dot = document.createElement('span');
+        dot.className = `route-endpoint route-endpoint-${kind}`;
+        dot.setAttribute('role', 'img'); dot.setAttribute('aria-label', title);
+        return dot;
+      }, { title, accessibilityLabel: title, animates: false, displayPriority: 1000,
+        anchorOffset: new DOMPoint(sharedEndpoint ? kind === 'start' ? -8 : 8 : 0, 6) });
+      mapItems = [endpoint(start, 'start', 'Start')];
+      if (!samePoint(start, data.position) && !samePoint(end, data.position)) {
+        mapItems.push(new window.mapkit.MarkerAnnotation(coordinate(data.position), { color: '#378ADD', glyphText: '●', title: 'Current location' }));
+      }
       if (model.hasRoute) {
         cancelEstimateWork(); estimatedRoute = null; estimateBasis = null; estimateFailures = 0;
         mapItems.unshift(new window.mapkit.PolylineOverlay(data.routePoints.map(coordinate), {
@@ -148,9 +170,10 @@
       } else {
         routeLabel(null);
       }
-      if (validPoint(data.destination)) mapItems.push(new window.mapkit.MarkerAnnotation(coordinate(data.destination), { color: '#21AD81', glyphText: '✓', title: 'Destination' }));
+      if (validPoint(end)) mapItems.push(endpoint(end, 'end', 'End'));
       map.addItems(mapItems); map.showItems(mapItems, { padding: new window.mapkit.Padding(48, 48, 48, 48) });
-      el('map').hidden = false; el('route-fallback').hidden = true; el('map-unavailable').hidden = true;
+      el('map').hidden = false; el('route-fallback').setAttribute('hidden', ''); el('map-unavailable').hidden = true;
+      el('route-legend').hidden = !validPoint(end);
       requestEstimatedRoute(data);
     } catch (error) {
       console.warn(`[Ludic Pulse] Map rendering failed (${typeof error?.name === 'string' ? error.name : 'Error'}).`);

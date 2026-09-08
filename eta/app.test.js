@@ -44,6 +44,7 @@ function element() {
     attributes: {},
     classList: { toggle() {} },
     setAttribute(name, value) { this.attributes[name] = value; },
+    removeAttribute(name) { delete this.attributes[name]; },
     querySelector(selector) {
       if (!children.has(selector)) children.set(selector, element());
       return children.get(selector);
@@ -108,6 +109,7 @@ async function runPage(data, directionResults, options = {}) {
     FeatureVisibility: { Hidden: 'hidden' },
     Coordinate,
     MarkerAnnotation: class MarkerAnnotation { constructor(point, options) { Object.assign(this, { point, options }); } },
+    Annotation: class Annotation { constructor(point, factory, options) { Object.assign(this, { point, options, element: factory(point, options) }); } },
     PolylineOverlay: Overlay,
     Style: class Style { constructor(options) { Object.assign(this, options); } },
     Padding: class Padding {},
@@ -166,6 +168,7 @@ async function runPage(data, directionResults, options = {}) {
   };
   const context = vm.createContext({
     Date,
+    DOMPoint: class DOMPoint { constructor(x, y) { Object.assign(this, { x, y }); } },
     console: { warn(message) { warnings.push(message); } },
     crypto: { randomUUID: () => 'session-id' },
     document,
@@ -306,13 +309,57 @@ test('prefers exact Tesla route geometry and skips Apple directions', async () =
   assert.equal(result.elements.get('route-source').hidden, false);
 });
 
+test('marks chronological route ends with small green Start and red End dots', async () => {
+  const midpoint = { latitude: 40.764, longitude: -111.892 };
+  const result = await runPage(active({ routePoints: [position, midpoint, destination], position: midpoint }), { routes: [] });
+  const annotations = result.maps[0].items.filter(item => item.options?.title);
+  const start = annotations.find(item => item.options.title === 'Start');
+  const end = annotations.find(item => item.options.title === 'End');
+  assert.deepEqual({ ...start.point }, position);
+  assert.deepEqual({ ...end.point }, destination);
+  assert.equal(start.element.className, 'route-endpoint route-endpoint-start');
+  assert.equal(end.element.className, 'route-endpoint route-endpoint-end');
+  assert.ok(annotations.some(item => item.options.title === 'Current location'));
+  assert.equal(result.elements.get('route-legend').hidden, false);
+  assert.equal(result.elements.get('car-marker').attributes.visibility, 'visible');
+  assert.notEqual(result.elements.get('start-marker').attributes.cx, result.elements.get('destination-marker').attributes.cx);
+});
+
+test('keeps both endpoint roles visible at a shared loop coordinate', async () => {
+  const result = await runPage(active({ routePoints: [position, destination, position], position }), { routes: [] });
+  const start = result.maps[0].items.find(item => item.options?.title === 'Start');
+  const end = result.maps[0].items.find(item => item.options?.title === 'End');
+  assert.equal(start.options.anchorOffset.x, -8);
+  assert.equal(end.options.anchorOffset.x, 8);
+  assert.deepEqual({ ...start.point }, { ...end.point });
+  assert.notEqual(result.elements.get('start-marker').attributes.cx, result.elements.get('destination-marker').attributes.cx);
+  assert.equal(result.elements.get('car-marker').attributes.visibility, 'hidden');
+});
+
+test('reveals the SVG fallback with real hidden-attribute semantics', async () => {
+  const result = await runPage(active({ mapToken: null, routePoints: [position, destination, position] }), { routes: [] });
+  assert.equal(result.elements.get('map').hidden, true);
+  assert.equal(Object.hasOwn(result.elements.get('route-fallback').attributes, 'hidden'), false);
+  assert.notEqual(result.elements.get('start-marker').attributes.cx, result.elements.get('destination-marker').attributes.cx);
+  assert.doesNotMatch(source, /(?:svg|el\('route-fallback'\))\.hidden\s*=/);
+});
+
+test('uses the same endpoint names without route geometry and does not invent an end', async () => {
+  const endpoints = await runPage(active(), new Error('directions unavailable'));
+  assert.ok(endpoints.maps[0].items.some(item => item.options?.title === 'Start'));
+  assert.ok(endpoints.maps[0].items.some(item => item.options?.title === 'End'));
+  const noEnd = await runPage(active({ destination: null }), { routes: [] });
+  assert.ok(!noEnd.maps[0].items.some(item => item.options?.title === 'End'));
+  assert.equal(noEnd.elements.get('route-legend').hidden, true);
+});
+
 test('keeps the live endpoint map when Apple directions fails', async () => {
   const result = await runPage(active(), new Error('directions unavailable'));
   assert.equal(result.directionCalls, 1);
   assert.equal(result.elements.get('map').hidden, false);
   assert.equal(result.elements.get('route-source').textContent, 'Route temporarily unavailable · retrying');
   assert.equal(result.elements.get('route-source').hidden, false);
-  assert.equal(result.elements.get('route-fallback').hidden, true);
+  assert.equal(result.elements.get('route-fallback').attributes.hidden, '');
   assert.equal(result.timers.filter((timer) => timer.active)[0].delay, 5_000);
   assert.equal(result.warnings.length, 1);
   assert.doesNotMatch(result.warnings[0], /40\.7608|-111\.891/);
